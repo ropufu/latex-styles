@@ -1,0 +1,45 @@
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{knownsets}[2016/21/09 v0.9 (G Sokolov)]
+\PackageInfo{knownsets}{Some well-known sets and common set notation}
+
+\RequirePackage{amsmath}
+
+% ~~ Well-known spaces ~~
+\newcommand{\Naturals}{\mathbb{N}}  % Natural numbers.
+\newcommand{\Rationals}{\mathbb{Q}} % Rational numbers.
+\newcommand{\Reals}{\mathbb{R}}     % Real numbers.
+\newcommand{\Complexes}{\mathbb{C}} % Complex numbers.
+\newcommand{\Integers}{\mathbb{Z}}  % Integer numbers.
+\newcommand{\Discs}{\mathbb{D}}     % Unit discs.
+
+% ~~ Non-standard spaces ~~
+\newcommand{\Vectors}{\mathbb{V}}   % Vector space.
+
+% ~~ Enumeration set notation ~~
+\newcommand{\set}[1]{\left\{#1\right\}}     % Set with automatically scaled braces: {...}.
+\newcommand{\smallset}[1]{\{#1\}}           % Set with unscaled braces.
+\newcommand{\bigset}[1]{\big\{#1\big\}}     % Set with \big braces.
+\newcommand{\Bigset}[1]{\Big\{#1\Big\}}     % Set with \Big braces.
+\newcommand{\Biggset}[1]{\Bigg\{#1\Bigg\}}  % Set with \Bigg braces.
+\newcommand{\xset}[2][]{#1\{#2#1\}}         % Set with custom scaled braces.
+
+% ~~ Predicate set notation ~~
+\newcommand{\csetDefault}{|}
+% Set with condition and automatically scaled braces: {... | ...}.
+\newcommand{\cset}[3][\ifx{\csetDefault}{|}{\middle|}\else{\csetDefault}\fi]{\left\{#2 \,#1\, #3\right\}}
+\newcommand{\smallcset}[3][\csetDefault]{\{#2 \,#1\, #3\}}              % Set with condition and unscaled braces.
+\newcommand{\bigcset}[3][\csetDefault]{\big\{#2 \,#1\, #3\big\}}        % Set with condition and \big braces.
+\newcommand{\Bigcset}[3][\csetDefault]{\Big\{#2 \,#1\, #3\Big\}}        % Set with condition and \Big braces.
+\newcommand{\Biggcset}[3][\csetDefault]{\Bigg\{#2 \,#1\, #3\Bigg\}}     % Set with condition and \Bigg braces.
+\newcommand{\nocset}[3][\csetDefault]{#2 \,#1\, #3}                     % Set with condition and no braces.
+
+% ~~ Predicate sequence notation ~~
+\newcommand{\cseqDefault}{|}
+% Tuple with condition and automatically scaled parentheses: (... | ...).
+\newcommand{\cseq}[3][\ifx{\cseqDefault}{|}{\middle|}\else{\cseqDefault}\fi]{\left(#2 \,#1\, #3\right)}
+\newcommand{\smallcseq}[3][\cseqDefault]{(#2 \,#1\, #3)}              % Tuple with condition and unscaled parentheses.
+\newcommand{\bigcseq}[3][\cseqDefault]{\big(#2 \,#1\, #3\big)}        % Tuple with condition and \big parentheses.
+\newcommand{\Bigcseq}[3][\cseqDefault]{\Big(#2 \,#1\, #3\Big)}        % Tuple with condition and \Big parentheses.
+\newcommand{\Biggcseq}[3][\cseqDefault]{\Bigg(#2 \,#1\, #3\Bigg)}     % Tuple with condition and \Bigg parentheses.
+\newcommand{\nocseq}[3][\cseqDefault]{#2 \,#1\, #3}                   % Tuple with condition and no parentheses.

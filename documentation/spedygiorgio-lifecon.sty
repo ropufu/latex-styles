@@ -1,0 +1,114 @@
+\NeedsTeXFormat{LaTeX2e}
+
+% Downloaded from https://github.com/spedygiorgio/lifecontingencies/blob/master/vignettes/lifecon.sty
+% Modified by G. Sokolov for documentation purposes.
+\ProvidesPackage{spedygiorgio-lifecon}[2004/07/27 v2.1 (Eddy Trivedi)]
+\PackageInfo{spedygiorgio-lifecon}{Provides Commands to typeset Life Contingencies' Symbols}
+
+\RequirePackage{amsmath}
+
+\newlength{\LC@temph}
+\newlength{\LC@tempw}
+\newlength{\LC@templ}
+\newlength{\LC@tempwtwo}
+
+\newcommand*{\xlcroof}[1]{%
+\settoheight{\LC@temph}{\mbox{$\scriptstyle\overline{#1\,}$}}
+{\mbox{$\scriptstyle\overline{#1\,}$\kern-0.1pt
+\rule[-0.35pt]{.3pt}{\LC@temph}}} }
+
+%\DeclareRobustCommand{\xlcroof}[1]{%
+%\def\arraystretch{0}%
+%\setlength\arraycolsep{1pt}% adjust these
+%\setlength\arrayrulewidth{.3pt}% two settings
+%\begin{array}[b]{@{}c|}\hline
+%\\[\arraycolsep]%
+%\scriptstyle #1%
+%\end{array}%
+%}
+
+\newcommand*{\xlcterm}[3]{%
+\settoheight{\LC@temph}{\mbox{$\scriptstyle\overline{#3\,}$}}
+\settowidth{\LC@tempw}{$\scriptstyle #2$}
+{#1}{}_{#2:\xlcroof{#3}}^{\makebox[\LC@tempw]{\hfill$\scriptstyle 1$\hfill}}
+}
+
+\newcommand*{\xlctermadj}[3]{%
+\settoheight{\LC@temph}{\mbox{$\scriptstyle\overline{#3\,}$}}
+\settowidth{\LC@tempw}{$\scriptstyle #2$}
+{#1}{}_{#2:\xlcroof{#3}}^{\makebox[\LC@tempw]{\hfill$\scriptstyle%
+A$\hfill}} }
+
+\newcommand*{\xlcend}[3]{%
+\settoheight{\LC@temph}{\mbox{$\scriptstyle\overline{#3\,}$}}
+\settowidth{\LC@tempw}{$\scriptstyle #3$}
+\settowidth{\LC@templ}{$\scriptstyle #2$:}
+{#1}{}_{#2:\xlcroof{#3}}^{\hspace{\LC@templ}\makebox[\LC@tempw]{\hfill$\scriptstyle 1$\hfill}}
+}
+
+\newcommand*{\xlcfirst}[4][1]{%
+\settowidth{\LC@tempw}{$\scriptstyle #3$}
+{#2}{}_{{#3}{#4}}^{\makebox[\LC@tempw]{\hfill$\scriptstyle #1$\hfill}}
+}
+
+\newcommand*{\xlcsecond}[4][2]{%
+\settowidth{\LC@tempw}{$\scriptstyle #4$}
+\settowidth{\LC@templ}{$\scriptstyle #3$}
+{#2}{}_{{#3}{#4}}^{\hspace{\LC@templ}\makebox[\LC@tempw]{\hfill$\scriptstyle #1$\hfill}}
+}
+
+\newcommand*{\xsurstat}[3]{%
+\settowidth{\LC@tempw}{$#2_{1}#2_{2}\dots$}
+\dfrac{\hspace{\LC@tempw}#1}{#2_{1}#2_{2}\dots#2_{#3}}
+}
+
+\newcommand*{\xdefsurstat}[3]{%
+\settowidth{\LC@tempw}{$#2_{1}#2_{2}\dots$}
+\dfrac{\hspace{\LC@tempw}[#1]}{#2_{1}#2_{2}\dots#2_{#3}}
+}
+
+\newcommand*{\xlccomptwo}[4]{%
+\settowidth{\LC@tempw}{$\scriptstyle #2$}%
+\settowidth{\LC@templ}{$\scriptstyle #3 #4$}%
+{#1}{}_{\substack{#2 #3 #4\\\makebox[\LC@tempw]{\hfill$\scriptstyle1$\hfill}
+\hspace{\LC@templ}}}^{\hspace{\LC@tempw}\scriptstyle2}%
+}
+
+\newcommand*{\xlccompthree}[5]{%
+\settowidth{\LC@temph}{$\scriptstyle #2$}
+\settowidth{\LC@tempw}{$\scriptstyle #3$}
+\settowidth{\LC@tempwtwo}{$\scriptstyle #3$}
+\settowidth{\LC@templ}{$\scriptstyle #4 #5$}
+{#1}{}_{\substack{#2 #3 #4 #5\\\makebox[\LC@temph]{\hfill$\scriptstyle 1$\hfill}%
+\makebox[\LC@tempw]{\hfill$\scriptstyle 2$\hfill}%
+\hspace{\LC@templ}%
+}}^{\hspace{\LC@temph}\hspace{\LC@tempw}\makebox[\LC@tempwtwo]{\hfill$\scriptstyle 3$\hfill}}
+}
+
+%% Typesetting Common Symbols in a convenient way%%
+\newcommand*{\xtermins}[2]{%
+\xlcterm{A}{#1}{#2} }
+
+\newcommand*{\xterminsc}[2]{%
+\xlcterm{\bar{A}}{#1}{#2} }
+
+\newcommand*{\xinsend}[2]{%
+A_{#1:\xlcroof{#2}} }
+
+\newcommand*{\xinsendc}[2]{%
+\bar{A}_{#1:\xlcroof{#2}} }
+
+\newcommand*{\xpureend}[2]{%
+\xlcend{A}{#1}{#2} }
+
+\newcommand*{\xpureendc}[2]{%
+{}_{#2}E_{#1} }
+
+\newcommand*{\xanndue}[2]{%
+\ddot{a}_{#1:\xlcroof{#2}} }
+
+\newcommand*{\xanncon}[2]{%
+\bar{a}_{#1:\xlcroof{#2}}  }
+
+\newcommand*{\xannimm}[2]{%
+a_{#1:\xlcroof{#2}} }

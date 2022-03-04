@@ -1,0 +1,160 @@
+
+\documentclass{article}
+\usepackage[margin=1.3in]{geometry}
+\usepackage{hyperref}
+\usepackage{../actuarial}
+\usepackage{spedygiorgio-lifecon}
+
+
+\begin{document}
+
+\section{Motivation}
+
+Originally motivated by \href{https://github.com/spedygiorgio/lifecontingencies/blob/master/vignettes/lifecon.sty}{spedygiorgio's} \texttt{lifecon.sty}, this package mimics its behavior for existing commands and extends it to a certain extent.
+
+\section{Inherited from \texttt{lifecon}}
+
+The following commands are provided for backward compatibility:
+\begin{center}
+    \begin{verbatim}
+        \lcroof{n}
+        \lcterm{a}{x}{n}
+        \lctermadj{a}{x}{n}
+        \lcend{a}{x}{n}
+        \lcfirst{a}{x}{y},  \lcfirst[u]{a}{x}{y}
+        \lcsecond{a}{x}{y}, \lcsecond[u]{a}{x}{y}
+        \lccomptwo{a}{x}{y}{z}
+        \lccompthree{a}{x}{y}{z}{w}
+        \surstat{a}{x}{n}
+        \defsurstat{a}{x}{n}
+        \anndue{x}{n}, \anncon{x}{n}, \annimm{x}{n}
+        \termins{x}{n},  \insend{x}{n},  \pureend{x}{n}
+        \terminsc{x}{n}, \insendc{x}{n}, \pureendc{x}{n}
+    \end{verbatim}
+\end{center}
+%
+Styling of \verb"\lcroof" has been replaced with that of \verb"\actuarialangle", since the former is subscripted, unlike the latter.
+\begin{center}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{| l | c | c |}
+        \hline
+        Command               & Old Rendering   & New Rendering  \\ \hline
+        $\verb"\lcroof{n}i"$  & $\xlcroof{n}i$  & $\lcroof{n}i$  \\ \hline
+    \end{tabular}
+\end{center}
+
+The following have been unchanged:
+\begin{center}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{| l | c | c |}
+        \hline
+        Command                             & Old Rendering                   & New Rendering                  \\ \hline
+        \verb"\lcterm{a}{x}{n}"             & $\xlcterm{a}{x}{n}$             & $\lcterm{a}{x}{n}$             \\ \hline
+        \verb"\lctermadj{a}{x}{n}"          & $\xlctermadj{a}{x}{n}$          & $\lctermadj{a}{x}{n}$          \\ \hline
+        \verb"\lcend{a}{x}{n}"              & $\xlcend{a}{x}{n}$              & $\lcend{a}{x}{n}$              \\ \hline
+        \verb"\lcfirst{a}{x}{y}"            & $\xlcfirst{a}{x}{y}$            & $\lcfirst{a}{x}{y}$            \\ \hline
+        \verb"\lcsecond{a}{x}{y}"           & $\xlcsecond{a}{x}{y}$           & $\lcsecond{a}{x}{y}$           \\ \hline
+        \verb"\lccomptwo{a}{x}{y}{z}"       & $\xlccomptwo{a}{x}{y}{z}$       & $\lccomptwo{a}{x}{y}{z}$       \\ \hline
+        \verb"\lccompthree{a}{x}{y}{z}{w}"  & $\xlccompthree{a}{x}{y}{z}{w}$  & $\lccompthree{a}{x}{y}{z}{w}$  \\ \hline
+    \end{tabular}
+\end{center}
+
+
+The following commands have a slight change in styling:
+\begin{center}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{| l | c | c |}
+        \hline
+        Command                      & Old Rendering                  & New Rendering     \\ \hline
+        \verb"\surstat{a}{x}{n}"     & $\xsurstat{a}{x}{n}$     & $\surstat{a}{x}{n}$     \\[2ex] \hline
+        \verb"\defsurstat{a}{x}{n}"  & $\xdefsurstat{a}{x}{n}$  & $\defsurstat{a}{x}{n}$  \\[2ex] \hline
+    \end{tabular}
+\end{center}
+
+Some common life annuity / insurance types:
+\begin{center}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{| l | l | c | c |}
+        \hline
+        Description                & Command                 & Old Rendering       & New Rendering      \\ \hline
+        Annuity due                & \verb"\anndue{x}{n}"    & $\xanndue{x}{n}$    & $\anndue{x}{n}$    \\ \hline
+        Annuity immediate          & \verb"\annimm{x}{n}"    & $\xannimm{x}{n}$    & $\annimm{x}{n}$    \\ \hline
+        Continuous annuity         & \verb"\anncon{x}{n}"    & $\xanncon{x}{n}$    & $\anncon{x}{n}$    \\ \hline
+        Discreet term insurance    & \verb"\termins{x}{n}"   & $\xtermins{x}{n}$   & $\termins{x}{n}$   \\ \hline
+        Discreet endowment         & \verb"\insend{x}{n}"    & $\xinsend{x}{n}$    & $\insend{x}{n}$    \\ \hline
+        Discreet pure endowment    & \verb"\pureend{x}{n}"   & $\xpureend{x}{n}$   & $\pureend{x}{n}$   \\ \hline
+        Continuous term insurance  & \verb"\terminsc{x}{n}"  & $\xterminsc{x}{n}$  & $\terminsc{x}{n}$  \\ \hline
+        Continuous endowment       & \verb"\insendc{x}{n}"   & $\xinsendc{x}{n}$   & $\insendc{x}{n}$   \\ \hline
+        Continuous pure endowment  & \verb"\pureendc{x}{n}"  & $\xpureendc{x}{n}$  & $\pureendc{x}{n}$  \\ \hline
+    \end{tabular}
+\end{center}
+Note the change in notation for pure endowment from $\xpureendc{x}{n}$ to $\pureendc{x}{n}$.
+
+
+\section{In spirit of \texttt{lifecon}}
+
+The following commands have been added with naming inspired by \texttt{lifecon}:
+\begin{center}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabular}{| l | l | c |}
+        \hline
+        New Command                & Inspired By                 & Rendering                 \\ \hline
+        \verb"\lcdue{b}{x}{n}"     & \verb"\anndue{x}{n}"        & $\lcdue{b}{x}{n}$         \\ \hline
+        \verb"\lcimm{b}{x}{n}"     & \verb"\annimm{x}{n}"        & $\lcimm{b}{x}{n}$         \\ \hline
+        \verb"\lccon{b}{x}{n}"     & \verb"\anncon{x}{n}"        & $\lccon{b}{x}{n}$         \\ \hline
+                                   & \verb"\lcterm{b}{x}{n}"     & $\lcterm{b}{x}{n}$        \\ \hline
+                                   & \verb"\lctermadj{b}{x}{n}"  & $\lctermadj{b}{x}{n}$     \\ \hline
+                                   & \verb"\lcend{b}{x}{n}"      & $\lcend{b}{x}{n}$         \\ \hline
+        \verb"\lc{w}{x}{t}"        &                             & $\lc{w}{x}{t}$            \\ \hline
+        \verb"\lcp{x}{t}"          &                             & $\lcp{x}{t}$              \\ \hline
+        \verb"\lcq{x}{t}"          &                             & $\lcq{x}{t}$              \\ \hline
+        \verb"\lcpterm{x}{n}{t}"   &                             & $\lcpterm{x}{n}{t}$       \\ \hline
+        \verb"\lcqterm{x}{n}{t}"   &                             & $\lcqterm{x}{n}{t}$       \\ \hline
+        \verb"\accomplete{w}"      &                             & $\accomplete{w}$          \\ \hline
+        \verb"\acdefer{w}{m}{k}"   &                             & $\acdefer{w}{m}{k}$       \\ \hline
+        \verb"\lcelife{x}"         & Complete life expectancy    & $\lcelife{x}$             \\ \hline
+        \verb"\lcelifeterm{x}{n}"  &                             & $\lcelifeterm{x}{n}$      \\ \hline
+        \verb"\lcecurt{x}"         & Curtate life expectancy     & $\lcecurt{x}$             \\ \hline
+        \verb"\lcecurtterm{x}{n}"  &                             & $\lcecurtterm{x}{n}$      \\ \hline
+    \end{tabular}
+\end{center}
+
+\newpage
+
+\section{Cashflows}
+
+To create cashflow figures, use the \texttt{cf} command:
+\begin{center}
+    \verb"\cf{length}{}{node pairs}{arrow pairs}"
+\end{center}
+or, if you want to specify scale (default is $1.5$),
+\begin{center}
+    \verb"\cf[scale]{length}{}{node pairs}{arrow pairs}"
+\end{center}
+The node (arrow) pairs should be of the form
+\[
+    x_1 \verb"/" \ell _1, \cdots , x_n \verb"/" \ell _n
+\]
+where $x_1, \cdots , x_n$ are the $x$-coordinates of the nodes (arrows), and $\ell _1, \cdots , \ell _n$ are the corresponding labels.
+
+For example, the following is the result of
+\begin{center}
+    \verb"\cf[1]{3.5}{0/$0$, 1/$1$, 3/$3$}{1/$C_1$, 2/$C_2$}"
+    \verb"\cf{3.5}{0/$0$, 1/$1$, 3/$3$}{1/$C_1$, 2/$C_2$}"
+\end{center}
+%
+\begin{center}
+    \cf[1]{3.5}{0/$0$, 1/$1$, 3/$3$}{1/$C_1$, 2/$C_2$}
+    \cf{3.5}{0/$0$, 1/$1$, 3/$3$}{1/$C_1$, 2/$C_2$}
+\end{center}
+
+Another example is $a _{\lcroof{n} i}$, the present value of the following cashflow:
+\[
+    \cf[1]{6.2}{0/$0$, 1/$1$, 2/$2$, 3/$\cdots $, 4/$n - 1$, 5/$\phantom{1}n\phantom{1}$}{1/$1$, 2/$1$, 3/$\cdots $, 4/$1$, 5/$1$}
+\]
+and $\ddot{a} _{\lcroof{n} i}$, the present value of the following cashflow:
+\[
+    \cf[1]{6.2}{0/$0$, 1/$1$, 2/$2$, 3/$\cdots $, 4/$n - 1$, 5/$\phantom{1}n\phantom{1}$}{0/$1$, 1/$1$, 2/$1$, 3/$\cdots $, 4/$1$}
+\]
+
+\end{document}

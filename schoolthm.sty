@@ -1,0 +1,37 @@
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{schoolthm}[2020/08/09 v0.1 (G Sokolov)]
+\PackageInfo{schoolthm}{Additional theorem-like styles.}
+
+\RequirePackage{amsmath}
+\RequirePackage{amsthm}
+
+% Theorems.
+\newtheorem{lemma}{Lemma}
+\newtheorem*{lemma*}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem*{theorem*}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem*{corollary*}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem*{proposition*}{Proposition}
+\newtheorem{assumption}{Assumption}
+\newtheorem*{assumption*}{Assumption}
+\newtheorem{definition}{Definition}
+\newtheorem*{definition*}{Definition}
+% More.
+\newtheorem*{remark*}{Remark}
+\newtheorem*{terminology*}{Terminology}
+\newtheorem*{notation*}{Notation}
+
+\newenvironment{example*}
+  {\paragraph*{Example.}\begin{itemize}\item[]}
+  {\end{itemize}}
+
+\newenvironment{exercise*}
+  {\paragraph*{Exercise.}\begin{itemize}\item[]}
+  {\end{itemize}}
+
+\newenvironment{algorithm*}
+  {\paragraph*{Algorithm.}\begin{itemize}\item[]}
+  {\end{itemize}}

@@ -1,0 +1,161 @@
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{actuarial}[2014/11/05 v0.1 (G Sokolov)]
+%\ModifiesAndExtendsPackage{lifecon}[2004/07/27 v2.1 (Eddy Trivedi)]
+\PackageInfo{actuarial}{Some actuarial notation}
+
+\RequirePackage{actuarialangle}
+\RequirePackage{amsmath}
+\RequirePackage{tikz}
+
+%\makeatletter
+%\newcommand{\raisemath}[1]{\mathpalette{\raisem@th{#1}}}
+%\newcommand{\raisem@th}[3]{\raisebox{#1}{$#2#3$}}
+%\makeatother
+
+\newlength{\act@temp}
+
+% Auxiliary command to make
+\newcommand*{\act@matchsc}[2]{%
+    \settowidth{\act@temp}{$\scriptstyle #1$}
+    \makebox[\act@temp][c]{$\scriptstyle #2$}
+}
+
+% ~~ Actuarial angle ~~
+\newcommand*{\lcroof}[1]{\actuarialangle{#1{\mskip 2.2mu}}{\mskip 1.8mu}}          % Name taken from <lifecon.sty>.
+
+% ~~ Basic actuarial notation ~~
+\newcommand*{\lcdue}[3]{\ddot{#1}{}_{#2:\lcroof{#3}}}
+\newcommand*{\lccon}[3]{\overline{#1}{}_{#2:\lcroof{#3}}}
+\newcommand*{\lcimm}[3]{#1{}_{#2:\lcroof{#3}}}
+\newcommand*{\lcterm}[3]{#1{}_{#2:\lcroof{#3}}^{\act@matchsc{#2}{1}}}              % Name taken from <lifecon.sty>.
+\newcommand*{\lctermadj}[3]{#1{}_{#2:\lcroof{#3}}^{\act@matchsc{#2}{A}}}           % Name taken from <lifecon.sty>.
+\newcommand*{\lcend}[3]{#1{}_{#2:\lcroof{#3}}^{\phantom{#2:} \act@matchsc{#3}{1}}} % Name taken from <lifecon.sty>.
+
+\newcommand*{\lcfirst}[4][1]{#2{}_{#3 #4}^{\act@matchsc{#3}{#1}}}                  % Name taken from <lifecon.sty>.
+\newcommand*{\lcsecond}[4][2]{#2{}_{#3 #4}^{\phantom{#3} \act@matchsc{#4}{#1}}}    % Name taken from <lifecon.sty>.
+
+\newcommand*{\lccomptwo}[4]{%
+    #1{} _{\substack{#2 #3 #4 \\ \act@matchsc{#2}{1} \phantom{#3 #4}}} %
+         ^{\phantom{#2} \act@matchsc{#3}{2}} %
+} % Name taken from <lifecon.sty>.
+\newcommand*{\lccompthree}[5]{%
+    #1{} _{\substack{#2 #3 #4 #5 \\ \act@matchsc{#2}{1} \act@matchsc{#3}{2} \phantom{#4 #5}}} %
+         ^{\phantom{#2 #3} \act@matchsc{#4}{3}} %
+} % Name taken from <lifecon.sty>.
+
+% ~~ Annuities ~~
+\newcommand*{\anndue}[2]{\lcdue{a}{#1}{#2}}     % Name taken from <lifecon.sty>.
+\newcommand*{\anncon}[2]{\lccon{a}{#1}{#2}}     % Name taken from <lifecon.sty>.
+\newcommand*{\annimm}[2]{\lcimm{a}{#1}{#2}}     % Name taken from <lifecon.sty>.
+% ~~ Insurance: discreet time ~~
+\newcommand*{\termins}[2]{\lcterm{A}{#1}{#2}}   % Name taken from <lifecon.sty>.
+\newcommand*{\insend}[2]{\lcimm{A}{#1}{#2}}     % Name taken from <lifecon.sty>.
+\newcommand*{\pureend}[2]{\lcend{A}{#1}{#2}}    % Name taken from <lifecon.sty>.
+% ~~ Insurance: continuous time ~~
+\newcommand*{\terminsc}[2]{\lcterm{\overline{A}}{#1}{#2}}  % Name taken from <lifecon.sty>.
+\newcommand*{\insendc}[2]{\lccon{A}{#1}{#2}}               % Name taken from <lifecon.sty>.
+\newcommand*{\pureendc}[2]{\lcend{\overline{A}}{#1}{#2}}   % Warning: clash with <lifecon.sty> which defines it as ``{}_{#2} E_{#1}''.
+% ~~ ??? ~~~
+\newcommand*{\surstat}[3]{\frac%
+    {\phantom{#2_{1} #2_{2} \dots }#1}
+    {#2_{1} #2_{2} \dots #2_{#3}}
+} % Name taken from <lifecon.sty>.
+\newcommand*{\defsurstat}[3]{\frac%
+    {\phantom{#2_{1} #2_{2} \dots }\left[#1\right]}
+    {#2_{1} #2_{2} \dots #2_{#3}}
+} % Name taken from <lifecon.sty>.
+
+
+% ~~ More life contingency notation ~~
+\newcommand*{\lc}[3]{{}_{#3}{#1}{}_{#2}}
+\newcommand*{\lcp}[2]{\lc{p}{#1}{#2}}
+\newcommand*{\lcq}[2]{\lc{q}{#1}{#2}}
+\newcommand*{\lcpterm}[3]{\lc{p}{#1:\lcroof{#2}}{#3}}
+\newcommand*{\lcqterm}[3]{\lc{q}{#1:\lcroof{#2}}{#3}}
+
+% ~~ Life expectancy ~~
+\newcommand*{\lcecurt}[1]{e_{#1}}
+\newcommand*{\lcecurtterm}[2]{e_{#1:\lcroof{#2}}}
+\newcommand*{\lcelife}[1]{\accomplete{e}{}_{#1}}
+\newcommand*{\lcelifeterm}[2]{\accomplete{e}{}_{#1:\lcroof{#2}}}
+
+% ~~ Misc commands ~~
+\newcommand*{\accomplete}[1]{\overset{\circ }{#1}}
+\newcommand*{\acdefer}[3]{{}_{\left.{#2}\middle|{#3}\right.}#1}
+
+
+% Cashflows.
+
+\usetikzlibrary{arrows,decorations.markings}
+\tikzset{axis/.style={thick,decoration={markings,mark=at position 1 with %
+    {\arrow[scale=1.5,>=stealth]{>}}},postaction={decorate}}}
+\tikzset{pay/.style={color=black!60, semithick, decoration={markings,mark=at position 1 with %
+    {\arrow[scale=1.5,>=stealth]{>}}},postaction={decorate}}}
+\tikzset{jmp/.style={->,semithick}}
+
+%\tikzset{axis/.style={thick, ->, >=stealth}}
+%\tikzset{pay/.style={color=gray, semithick, ->, >=stealth, shorten >=2pt}}
+
+\newcommand*{\cashflow}[4][1.5]{
+  \begin{tikzpicture}[
+    scale=#1,
+    every node/.style={color=black}]
+        % Investments
+        \foreach \x/\c in {#4} {
+            \draw (\x cm,12pt) node[anchor=south] {\c};
+            \draw[pay] (\x cm,12pt) -- (\x cm,1pt);
+        }
+        % Axis
+        \draw[axis] (-0.2,0) -- (#2,0);
+        % Axis labels
+        \foreach \x/\t in {#3} {
+            \draw (\x cm,-1pt) node[anchor=north] {\t};
+            \filldraw[black] (\x cm, 0pt) circle(0.8pt);
+        }
+  \end{tikzpicture}
+}
+
+\newcommand*{\cf}[4][1.5]{\cashflow[#1]{#2}{#3}{#4}}
+
+\newcommand*{\timeline}[4][1.5]{
+  \begin{tikzpicture}[
+    scale=#1,
+    every node/.style={color=black}]
+        % Top Labels
+        \foreach \x/\c in {#4} {
+            \draw (\x cm,4pt) node[anchor=south] {\c};
+        }
+        % Axis
+        \draw[axis] (-0.2,0) -- (#2,0);
+        % Axis labels
+        \foreach \x/\t in {#3} {
+            \draw (\x cm,-1pt) node[anchor=north] {\t};
+            \filldraw[black] (\x cm, 0pt) circle(0.8pt);
+        }
+  \end{tikzpicture}
+}
+
+\newcommand*{\jumpline}[5][1.5]{
+  \begin{tikzpicture}[
+    scale=#1,
+    every node/.style={color=black}]
+        % Top Jumps
+        \foreach \x/\y in {#4} {
+            \draw (\y cm,4pt) node[anchor=north] (jumpto) {};
+            \draw (\x cm,4pt) node[anchor=north] (jumpfrom) {} edge[jmp,bend left=45] (jumpto);
+        }
+        % Bottom Jumps
+        \foreach \x/\y in {#5} {
+            \draw (\y cm,-4pt) node[anchor=south] (jumpto) {};
+            \draw (\x cm,-4pt) node[anchor=south] (jumpfrom) {} edge[jmp,bend right=60] (jumpto);
+        }
+        % Axis
+        \draw[axis] (-0.2,0) -- (#2,0);
+        % Axis labels
+        \foreach \x/\t in {#3} {
+            \draw (\x cm,-1pt) node[anchor=north] {\t};
+            \filldraw[black] (\x cm, 0pt) circle(0.8pt);
+        }
+  \end{tikzpicture}
+}

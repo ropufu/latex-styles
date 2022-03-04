@@ -1,0 +1,447 @@
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{maybe}[2018/25/08 v0.91 (G Sokolov)]
+\PackageInfo{maybe}{Some probability and statistics stuff and common notation}
+
+\RequirePackage{amsmath}
+\RequirePackage{mathabx} % For absolute continuity symbol.
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+
+
+% ~~ Absolute continuity ~~
+% Begin import of specific characters from another font.
+% Setup the matha font (from mathabx.sty)
+\DeclareFontFamily{U}{matha}{\hyphenchar\font45}
+\DeclareFontShape{U}{matha}{m}{n}{
+    <5> <6> <7> <8> <9> <10> gen * matha
+    <10.95> matha10 <12> <14.4> <17.28> <20.74> <24.88> matha12
+}{}
+\DeclareSymbolFont{matha}{U}{matha}{m}{n}
+% Define an \abscont character as \ll from the font (from mathabx.dcl)
+\DeclareMathSymbol{\abscont}{3}{matha}{"21}
+% End of import.
+
+
+% ~~ Operators ~~
+\let\Pr\relax
+\DeclareMathOperator{\Pr}{\mathsf{P}}         % Probability P.
+\DeclareMathOperator{\dist}{\mathsf{dist}}    % Distance.
+\DeclareMathOperator{\EV}{\mathsf{E}}         % Expected value.
+\DeclareMathOperator{\Var}{\mathsf{Var}}      % Variance.
+\DeclareMathOperator{\SD}{\mathsf{SD}}        % Standard deviation.
+\DeclareMathOperator{\SE}{\mathsf{SE}}        % Standard error.
+\DeclareMathOperator{\Cov}{\mathsf{Cov}}      % Covariance.
+\DeclareMathOperator{\Corr}{\mathsf{Corr}}    % Correlation.
+\DeclareMathOperator{\Bias}{\mathsf{Bias}}    % Bias.
+\DeclareMathOperator{\MSE}{\mathsf{MSE}}      % Mean squared error.
+\DeclareMathOperator{\MLE}{\mathsf{MLE}}      % Maximum likelihood estimator.
+\DeclareMathOperator{\IQR}{\mathsf{IQR}}      % Inter-quartile range.
+
+
+% ~~ Function-styled operators ~~
+\DeclareMathOperator*{\Support}{supp}        % Support.
+\DeclareMathOperator*{\argmax}{arg\,max}     % Argument where maximum is attained.
+\DeclareMathOperator*{\argmin}{arg\,min}     % Argument where minimum is attained.
+\DeclareMathOperator*{\esssup}{ess\,sup}     % Essental supremum.
+\DeclareMathOperator*{\essinf}{ess\,inf}     % Essental infimum.
+\DeclareMathOperator*{\esssupp}{ess\,supp}   % Essental support.
+
+
+% ~~ Distributions ~~
+\DeclareMathOperator{\DGaussian}{\mathrm{Gaussian}}     % Gaussian distribution.
+\DeclareMathOperator{\DNormal}{\mathrm{Normal}}         % Normal distribution.
+\DeclareMathOperator{\DLogNormal}{\ln \DNormal}         % Log-normal distribution.
+\DeclareMathOperator{\DStudent}{\mathrm{Student's--{\it t}}} % Student's t-distribution.
+\DeclareMathOperator{\DExponential}{\mathrm{Exp}}       % Exponential distribution.
+\DeclareMathOperator{\DPareto}{\mathrm{Pareto}}         % Pareto distribution
+\DeclareMathOperator{\DGamma}{\mathrm{Gamma}}           % Gamma distribution.
+\DeclareMathOperator{\DBeta}{\mathrm{Beta}}             % Beta distribution.
+\DeclareMathOperator{\DChiSquared}{\chi^2}              % Chi-squared distribution.
+\DeclareMathOperator{\DBernoulli}{\mathrm{Bernoulli}}   % Bernoulli distribution.
+\DeclareMathOperator{\DBinomial}{\mathrm{Binomial}}     % Binomial distribution.
+\DeclareMathOperator{\DGeometric}{\mathrm{Geometric}}   % Geometric distribution.
+\DeclareMathOperator{\DUniform}{\mathrm{Uniform}}       % Uniform distribution.
+\DeclareMathOperator{\DPoisson}{\mathrm{Poisson}}       % Poisson distribution.
+\DeclareMathOperator{\DCauchy}{\mathrm{Cauchy}}         % Cauchy distribution.
+
+
+% ~~ Misc ~~
+\newcommand{\Hyp}{\mathcal{H}}
+\newcommand{\iid}{\overset{\text{iid}}{\sim}}
+\newcommand{\pto}{\overset{\text{p.~}}{\to}}    % Convergence in distribution.
+\newcommand{\dto}{\overset{\text{d.~}}{\to}}    % Convergence in probability.
+\newcommand{\asto}{\overset{\text{a.s.~}}{\to}} % Almost sure convergence.
+\newcommand{\eqae}{\overset{\text{a.e.}}{=}}
+
+% Calculates Tikz coordinates for two intersecting circles. Arguments are: (x_1, y_1, r_1, x_2, y_2, r_2).
+% Creates variables: \upX, \upY, \downX, \downY, \upAngleA, \upAngleB, \downAngleA, \downAngleB.
+% Creates coordinates: (inter1), (inter2), (centerA), (centerB).
+\newcommand{\tikzCrossCircles}[6]{%
+    \path
+        let
+            \n{ax} = {#1},
+            \n{ay} = {#2},
+            \n{ar} = {#3},
+            \n{bx} = {#4},
+            \n{by} = {#5},
+            \n{br} = {#6},
+            \n{dist} = {veclen(\n{bx} - \n{ax}, \n{by} - \n{ay})},
+            \n{cos} = {(\n{bx} - \n{ax}) / \n{dist}},
+            \n{sin} = {(\n{by} - \n{ay}) / \n{dist}},
+            \n1 = {\n{dist} - \n{ar} - \n{br}},
+            \n2 = {\n{dist} - \n{ar} + \n{br}},
+            \n3 = {\n{dist} + \n{ar} - \n{br}},
+            \n4 = {\n{dist} + \n{ar} + \n{br}},
+            \n5 = {0.5*(\n{dist} * \n{dist} + \n{ar} * \n{ar} - \n{br} * \n{br}) / \n{dist}},
+            \n6 = {0.5*sqrt(-\n1 * \n2 * \n3 * \n4) / \n{dist}},
+            \n{upX} = {\n5 * \n{cos} - \n6 * \n{sin} + \n{ax}},
+            \n{upY} = {\n5 * \n{sin} + \n6 * \n{cos} + \n{ay}},
+            \n{downX} = {\n5 * \n{cos} + \n6 * \n{sin} + \n{ax}},
+            \n{downY} = {\n5 * \n{sin} - \n6 * \n{cos} + \n{ay}},
+            \n{upAngleA} = {acos((\n{upX} - \n{ax}) / \n{ar}) * sign(\n{upY} - \n{ay})},
+            \n{upAngleB} = {acos((\n{upX} - \n{bx}) / \n{br}) * sign(\n{upY} - \n{by})},
+            \n{downAngleA} = {acos((\n{downX} - \n{ax} ) / \n{ar}) * sign(\n{downY} - \n{ay})},
+            \n{downAngleB} = {acos((\n{downX} - \n{bx}) / \n{br}) * sign(\n{downY} - \n{by})}
+        in
+        \pgfextra{\xdef\upX{\n{upX}}}
+        \pgfextra{\xdef\upY{\n{upY}}}
+        \pgfextra{\xdef\downX{\n{downX}}}
+        \pgfextra{\xdef\downY{\n{downY}}}
+        \pgfextra{\xdef\upAngleA{\n{upAngleA}}}
+        \pgfextra{\xdef\upAngleB{\n{upAngleB}}}
+        \pgfextra{\xdef\downAngleA{\n{downAngleA}}}
+        \pgfextra{\xdef\downAngleB{\n{downAngleB}}}
+        (\n{upX}, \n{upY}) coordinate (inter1)
+        (\n{downX}, \n{downY}) coordinate (inter2)
+        (\n{ax}, \n{ay}) coordinate (centerA)
+        (\n{bx}, \n{by}) coordinate (centerB);
+} % \tikzCrossCircles
+
+% Draw a (left--right) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style left.
+% -- 6: style right.
+\newcommand{\tikzVennPizzaLR}[6]{
+    \draw[#4] #1 circle (#2);
+    % Left hemisphere.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (90+\n{phi} : #3) arc (90+\n{phi} : 270-\n{phi} : #3) -- cycle;
+    % Right hemisphere.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : -90+\n{phi}: #3) -- cycle;
+} % \tikzVennPizzaLR
+
+% Draw a (top--bottom) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style top.
+% -- 6: style bottom.
+\newcommand{\tikzVennPizzaTB}[6]{
+    \draw[#4] #1 circle (#2);
+    % Top hemisphere.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (0+\n{phi} : #3) arc (0+\n{phi} : 180-\n{phi} : #3) -- cycle;
+    % Bottom hemisphere.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (0-\n{phi} : #3) arc (0-\n{phi} : -180+\n{phi}: #3) -- cycle;
+} % \tikzVennPizzaTB
+
+% Draw a (left top--left bottom--right) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style left top.
+% -- 6: style left bottom.
+% -- 7: style right.
+\newcommand{\tikzVennPizzaLLR}[7]{
+    \draw[#4] #1 circle (#2);
+    % Left top quadrant.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90+\n{phi} : #3) arc (90+\n{phi} : 180-\n{phi} : #3) -- ($#1 + (-\n{delta},\n{delta})$) -- cycle;
+    % Left bottom quadrant.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (-90-\n{phi} : #3) arc (-90-\n{phi} : -180+\n{phi} : #3) -- ($#1 + (-\n{delta},-\n{delta})$) -- cycle;
+    % Right hemisphere.
+    \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : -90+\n{phi}: #3) -- cycle;
+} % \tikzVennPizzaLR
+
+% Draw a (left--right top--right bottom) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style left.
+% -- 6: style right top.
+% -- 7: style right bottom.
+\newcommand{\tikzVennPizzaLRR}[7]{
+    \draw[#4] #1 circle (#2);
+    % Left hemisphere.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (90+\n{phi} : #3) arc (90+\n{phi} : 270-\n{phi} : #3) -- cycle;
+    % Right top quadrant.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : 0+\n{phi} : #3) -- ($#1 + (\n{delta},\n{delta})$) -- cycle;
+    % Right bottom quadrant.
+    \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (-90+\n{phi} : #3) arc (-90+\n{phi} : 0-\n{phi} : #3) -- ($#1 + (\n{delta},-\n{delta})$) -- cycle;
+} % \tikzVennPizzaLRR
+
+% Draws a (left top--right top--bottom) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style left top.
+% -- 6: style right top.
+% -- 7: style bottom.
+\newcommand{\tikzVennPizzaTTB}[7]{
+    \draw[#4] #1 circle (#2);
+    % Left top quadrant.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90+\n{phi} : #3) arc (90+\n{phi} : 180-\n{phi} : #3) -- ($#1 + (-\n{delta},\n{delta})$) -- cycle;
+    % Right top quadrant.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : 0+\n{phi} : #3) -- ($#1 + (\n{delta},\n{delta})$) -- cycle;
+    % Bottom hemisphere.
+    \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (0-\n{phi} : #3) arc (0-\n{phi} : -180+\n{phi}: #3) -- cycle;
+} % \tikzVennPizzaLRR
+
+% Draws a (top--left bottom--right bottom) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style top.
+% -- 6: style left bottom.
+% -- 7: style right bottom.
+\newcommand{\tikzVennPizzaTBB}[7]{
+    \draw[#4] #1 circle (#2);
+    % Left top quadrant.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90+\n{phi} : #3) arc (90+\n{phi} : 180-\n{phi} : #3) -- ($#1 + (-\n{delta},\n{delta})$) -- cycle;
+    % Right top quadrant.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : 0+\n{phi} : #3) -- ($#1 + (\n{delta},\n{delta})$) -- cycle;
+    % Bottom hemisphere.
+    \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (0-\n{phi} : #3) arc (0-\n{phi} : -180+\n{phi}: #3) -- cycle;
+} % \tikzVennPizzaLRR
+
+% Draws a (left top--left bottom--right top--right bottom) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style left top.
+% -- 6: style left bottom.
+% -- 7: style right top.
+% -- 8: style right bottom.
+\newcommand{\tikzVennPizzaLRTB}[8]{
+    \draw[#4] #1 circle (#2);
+    % Left top quadrant.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90+\n{phi} : #3) arc (90+\n{phi} : 180-\n{phi} : #3) -- ($#1 + (-\n{delta},\n{delta})$) -- cycle;
+    % Left bottom quadrant.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (-90-\n{phi} : #3) arc (-90-\n{phi} : -180+\n{phi} : #3) -- ($#1 + (-\n{delta},-\n{delta})$) -- cycle;
+    % Right top quadrant.
+    \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : 0+\n{phi} : #3) -- ($#1 + (\n{delta},\n{delta})$) -- cycle;
+    % Right bottom quadrant.
+    \draw[#8] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (-90+\n{phi} : #3) arc (-90+\n{phi} : 0-\n{phi} : #3) -- ($#1 + (\n{delta},-\n{delta})$) -- cycle;
+} % \tikzVennPizzaLRR
+
+% Draw a horizontal sequence of labels.
+% -- 1 (defaults to empty): label style.
+% -- 2: number of coordinates.
+% -- 3: list of x-coordinates.
+% -- 4: list of x-labels.
+% -- 5: shared y-coordinate (not affected by \yscale).
+% Note: all lists should be comma-separated.
+% Required variables:
+% -- \xscale: multiplier for x-coordinates.
+\newcommand{\maybeXLabels}[5][]{%
+    \pgfmathtruncatemacro{\tempMaybeLastIndex}{#2 - 1}
+    % ~~ Bars ~~
+	\foreach \i in {0, ..., \tempMaybeLastIndex} {
+        \pgfmathparse{{#3}[\i]};
+        \let\tempXcoordinate\pgfmathresult;
+        \pgfmathparse{{#4}[\i]};
+        \let\tempXlabel\pgfmathresult;
+        \draw (\xscale*\tempXcoordinate, {\yscale*#5}) node[#1] {\tempXlabel};
+    } % \foreach
+} % \newcommand
+
+% Draw a horizontal sequence of ticks (vertical lines).
+% -- 1 (defaults to empty): line style.
+% -- 2: number of coordinates.
+% -- 3: list of x-coordinates.
+% -- 4: range of y-coordinates.
+% Note: all lists should be comma-separated.
+% Required variables:
+% -- \xscale: multiplier for x-coordinates.
+\newcommand{\maybeXTicks}[4][]{%
+    \pgfmathtruncatemacro{\tempMaybeLastIndex}{#2 - 1}
+    \pgfmathsetmacro{\tempYFrom}{min(#4)}
+    \pgfmathsetmacro{\tempYTo}{max(#4)}
+    % ~~ Ticks ~~
+	\foreach \i in {0, ..., \tempMaybeLastIndex} {
+        \pgfmathparse{{#3}[\i]};
+        \let\tempXcoordinate\pgfmathresult;
+        \draw[#1] (\xscale*\tempXcoordinate, \yscale*\tempYFrom) -- (\xscale*\tempXcoordinate, \yscale*\tempYTo);
+    } % \foreach
+} % \newcommand
+
+% Draw a point mass function.
+% Arguments:
+% -- 1 (defaults to empty): axis label.
+% -- 2: range of x-coordinates.
+% Note: all lists should be comma-separated.
+% Required styles:
+% -- arr: for arrow styling;
+% -- tick: for tick styling.
+% Required variables:
+% -- \xscale: multiplier for x-coordinates.
+% -- \yscale: multiplier for y-coordinates.
+% Example. \maybeHAxis[~values of $\ensuremath{X}$]{17, 29};
+\newcommand{\maybeHAxis}[2][]{%
+    % ~~ Axis ~~
+    \draw[->, arr] ({\xscale*min(#2) - 0.3}, 0) -- ({\xscale*max(#2) + 0.8}, 0) node[right] {#1};
+} % \newcommand
+
+% Draw a point mass function.
+% Arguments:
+% -- 1 (defaults to 1pt): point radius.
+% -- 2: number of coordinates.
+% -- 3: list of x-coordinates.
+% -- 4: list of y-coordinates.
+% -- 5: list of y-labels.
+% Note: all lists should be comma-separated.
+% Required styles:
+% -- arr: for arrow styling.
+% -- dot: for top circle styling.
+% -- bar: for vertical bar styling.
+% Required variables:
+% -- \xscale: multiplier for x-coordinates.
+% -- \yscale: multiplier for y-coordinates.
+\newcommand{\maybeVBars}[5][1pt]{%
+    \pgfmathtruncatemacro{\tempMaybeLastIndex}{#2 - 1}
+    % ~~ Bars ~~
+	\foreach \i in {0, ..., \tempMaybeLastIndex} {
+        \pgfmathparse{{#3}[\i]};
+        \let\tempXcoordinate\pgfmathresult;
+        \pgfmathparse{{#4}[\i]};
+        \let\tempYcoordinate\pgfmathresult;
+        \pgfmathparse{{#5}[\i]};
+        \let\tempYlabel\pgfmathresult;
+        \draw[dot] (\xscale*\tempXcoordinate, \yscale*\tempYcoordinate) circle (#1);
+        \draw[bar] (\xscale*\tempXcoordinate, 0) -- (\xscale*\tempXcoordinate, \yscale*\tempYcoordinate);
+        \draw (\xscale*\tempXcoordinate, \yscale*\tempYcoordinate) node[above] {\tempYlabel};
+    } % \foreach
+} % \newcommand
+
+% Draw a point mass function.
+% Arguments:
+% -- 1 (defaults to empty): axis label.
+% -- 2: number of coordinates.
+% -- 3: list of x-coordinates.
+% -- 4: list of y-coordinates.
+% -- 5: list of y-labels.
+% Note: all lists should be comma-separated.
+% Required styles:
+% -- arr: for arrow styling.
+% -- dot: for top circle styling.
+% -- bar: for vertical bar styling.
+% Required variables:
+% -- \xscale: multiplier for x-coordinates.
+% -- \yscale: multiplier for y-coordinates.
+% Example. \maybePMF[~values of $\ensuremath{X}$]{3}{1, 2, 3}{"1", "2", "3"}{1/2, 1/3, 1/6}{"0.5", "0.333", "0.167"};
+\newcommand{\maybePMF}[5][]{%
+    % ~~ Axis ~~
+    \maybeHAxis[#1]{#3};
+    % ~~ Bars ~~
+	\maybeVBars{#2}{#3}{#4}{#5};
+} % \newcommand
+
+% Draw a histogram rectangle.
+% Arguments:
+% -- 1 (defaults to empty): style for label node.
+% -- 2: left x-coordinate of the rectangle.
+% -- 3: right x-coordinate of the rectangle.
+% -- 4: area of the rectangle.
+% -- 5: label for the rectangle.
+% Required variables:
+% -- \xscale: multiplier for x-coordinates.
+% -- \yscale: multiplier for y-coordinates.
+\newcommand{\maybeHistBar}[5][]{%
+    \pgfmathsetmacro{\histBarHeight}{{#4 / (#3 - #2)}}
+    \pgfmathsetmacro{\histBarMiddleX}{{0.5*#2 + 0.5*#3}}
+    \draw[bar] (\xscale*#2, 0) rectangle (\xscale*#3, \yscale*\histBarHeight);
+    \draw (\xscale*\histBarMiddleX, \yscale*0.5*\histBarHeight) node[#1] {#5};
+} % \newcommand
+
+% Draw a box plot.
+% Arguments:
+% -- 1: comma-separated list (left whisker, Q1, Q2, Q3, right whisker).
+% -- 2: height of the box.
+% -- 3: height of the whisker.
+% -- 4: y-coordinate.
+% Required styles:
+% -- box: for box styling.
+% -- mark: for median marker styling.
+% -- whisk: for whisker styling.
+% -- wline: for whisker line styling.
+% Required variables:
+% -- \xscale: multiplier for x-coordinates.
+% -- \yscale: multiplier for y-coordinates.
+\newcommand{\maybeBoxPlot}[4]{%
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\tempMaybeLeft}{\pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\tempMaybeFirst}{\pgfmathresult};
+    \pgfmathparse{{#1}[2]}; \pgfmathsetmacro{\tempMaybeSecond}{\pgfmathresult};
+    \pgfmathparse{{#1}[3]}; \pgfmathsetmacro{\tempMaybeThird}{\pgfmathresult};
+    \pgfmathparse{{#1}[4]}; \pgfmathsetmacro{\tempMaybeRight}{\pgfmathresult};
+    \pgfmathsetmacro{\tempMaybeBoxWidth}{{\tempMaybeThird - \tempMaybeFirst}}
+    % ~~ And now for the box plot ~~
+    \draw[box] (\xscale*\tempMaybeFirst, {\yscale*(#4 - 0.5*#2)}) rectangle (\xscale*\tempMaybeThird, {\yscale*(#4 + 0.5*#2)}); % The box itself.
+    \draw[median] (\xscale*\tempMaybeSecond, {\yscale*(#4 - 0.5*#2)}) -- (\xscale*\tempMaybeSecond, {\yscale*(#4 + 0.5*#2)});   % Median marker.
+    \draw[wline] (\xscale*\tempMaybeLeft, \yscale*#4) -- (\xscale*\tempMaybeFirst, \yscale*#4);
+    \draw[wline] (\xscale*\tempMaybeThird, \yscale*#4) -- (\xscale*\tempMaybeRight, \yscale*#4);
+    \draw[whisk] (\xscale*\tempMaybeLeft, {\yscale*(#4 - 0.5*#3)}) -- (\xscale*\tempMaybeLeft, {\yscale*(#4 + 0.5*#3)});        % Left whisker.
+    \draw[whisk] (\xscale*\tempMaybeRight, {\yscale*(#4 - 0.5*#3)}) -- (\xscale*\tempMaybeRight, {\yscale*(#4 + 0.5*#3)});      % Right whisker.
+} % \newcommand
+
+% ~~ Six-sided dice unwrapped ~~
+\newcommand{\flatDSix}[6]{
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabular}{ |r|c|c|c| }
+        \cline{3-3}
+        \multicolumn{1}{r}{}      &
+        \multicolumn{1}{c}{}      &
+        \multicolumn{1}{|c|}{#5}  &
+        \multicolumn{1}{c}{}      \\ \cline{1-4}
+        %
+        #1 & #2 & #3 & #4         \\ \cline{1-4}
+        %
+        \multicolumn{1}{r}{}      &
+        \multicolumn{1}{c}{}      &
+        \multicolumn{1}{|c|}{#6}  &
+        \multicolumn{1}{c}{}      \\ \cline{3-3}
+    \end{tabular}
+} % \newcommand

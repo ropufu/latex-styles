@@ -1,0 +1,15 @@
+
+# ~~ LaTeX Auxiliary Files ~~
+
+*.aux
+*.bbl
+*.blg
+*.dat
+*.log
+*.nav
+*.out
+*.script
+*.snm
+*.synctex
+*.synctex.gz
+*.toc
