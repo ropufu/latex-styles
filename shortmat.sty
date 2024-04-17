@@ -1,13 +1,9 @@
 \NeedsTeXFormat{LaTeX2e}
 
-\ProvidesPackage{shortmat}[Grigory Sokolov]
-\PackageInfo{shortmat}{Some well-known sets and common set notation}
+\ProvidesPackage{shortmat}[2024/00/00 v0.01 (G Sokolov)]
+\PackageInfo{shortmat}{Some shorthand notation}
 
 \RequirePackage{amsmath}
-
-\newcommand{\MatrixLeft}{[}
-\newcommand{\MatrixRight}{]}
-%\renewcommand{\vec}[1]{\boldsymbol{#1}}
 
 % ~~ Short-hand notation for matrices ~~
 \newcommand{\m}[2][0ex]{%
@@ -18,27 +14,6 @@
 \left[\begin{matrix} #2 \\[#1] #3 \\[#1] #4 \\ \end{matrix}\right]}
 \newcommand{\mmmm}[5][0ex]{%
 \left[\begin{matrix} #2 \\[#1] #3 \\[#1] #4 \\[#1] #5 \\ \end{matrix}\right]}
-
-
-% ~~ Misc ~~
-\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
-\newcommand{\abs}[1]{\left\vert#1\right\vert}
-\newcommand{\slfrac}[3][\big]{#2#1/#3}
-\newcommand{\ceiling}[1]{\left\lceil #1 \right\rceil}
-\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
-\newcommand{\One}{\mathchoice{\rm 1\mskip-4.2mu l}{\rm 1\mskip-4.2mu l}{\rm 1\mskip-4.6mu l}{\rm 1\mskip-5.2mu l}}
-
-
-% ~~ Operators ~~
-\DeclareMathOperator{\Det}{\mathsf{det}}     % Determinant.
-\DeclareMathOperator{\Ker}{\mathsf{Ker}}     % Kernel.
-\DeclareMathOperator{\Col}{\mathsf{Col}}     % Column space.
-\DeclareMathOperator{\Image}{\mathsf{Image}} % Image.
-\DeclareMathOperator{\Rank}{\mathsf{rank}}   % Rank.
-\DeclareMathOperator{\Null}{\mathsf{Nul}}    % Null space.
-\DeclareMathOperator{\Span}{\mathsf{span}}   % span.
-\DeclareMathOperator{\Dim}{\mathsf{dim}}     % dimensions.
-
 
 % ~~ Alphabet: calligraphic ~~
 \newcommand{\cA}{\mathcal{A}}
