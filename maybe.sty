@@ -279,8 +279,7 @@
 % -- 4: list of x-labels.
 % -- 5: shared y-coordinate (not affected by \yscale).
 % Note: all lists should be comma-separated.
-% Required variables:
-% -- \xscale: multiplier for x-coordinates.
+% Required variables: \xscale and \yscale.
 \newcommand{\maybeXLabels}[5][]{%
     \pgfmathtruncatemacro{\tempMaybeLastIndex}{#2 - 1}
     % ~~ Bars ~~
@@ -290,6 +289,27 @@
         \pgfmathparse{{#4}[\i]};
         \let\tempXlabel\pgfmathresult;
         \draw (\xscale*\tempXcoordinate, {\yscale*#5}) node[#1] {\tempXlabel};
+    } % \foreach
+} % \newcommand
+
+% Draw a horizontal sequence of labels.
+% -- 1 (defaults to empty): label style.
+% -- 2: number of coordinates.
+% -- 3: list of y-coordinates.
+% -- 4: list of y-labels.
+% -- 5: shared x-coordinate (not affected by \xscale).
+% Note: all lists should be comma-separated.
+% Required variables:
+% Required variables: \xscale and \yscale.
+\newcommand{\maybeYLabels}[5][]{%
+    \pgfmathtruncatemacro{\tempMaybeLastIndex}{#2 - 1}
+    % ~~ Bars ~~
+	\foreach \i in {0, ..., \tempMaybeLastIndex} {
+        \pgfmathparse{{#3}[\i]};
+        \let\tempYcoordinate\pgfmathresult;
+        \pgfmathparse{{#4}[\i]};
+        \let\tempYlabel\pgfmathresult;
+        \draw ({\xscale*#5}, \yscale*\tempYcoordinate) node[#1] {\tempYlabel};
     } % \foreach
 } % \newcommand
 
