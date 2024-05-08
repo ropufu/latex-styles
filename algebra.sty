@@ -25,6 +25,18 @@
 \newcommand{\partialwrt}[1]{\frac{\partial}{\partial #1}}
 \newcommand{\ppartialwrt}[2]{\frac{\partial^2}{\partial #1 \, \partial #2}}
 \newcommand{\pppartialwrt}[3]{\frac{\partial^3}{\partial #1 \, \partial #2 \, \partial #3}}
+\newcommand{\partialof}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\ppartialof}[3]{\frac{\partial^2 #1}{\partial #2 \, \partial #3}}
+\newcommand{\pppartialof}[4]{\frac{\partial^3 #1}{\partial #2 \, \partial #3 \, \partial #4}}
+
+\newcommand{\crossvec}[3][ccc]{%
+\begin{vmatrix}
+    \begin{array}{#1}
+        \,\v{i} & \v{j} & \v{k}\, \\
+        \,#2\, \\
+        \,#3\, \\
+    \end{array}
+\end{vmatrix}}
 
 % ~~ Linear algebra ~~
 \DeclareMathOperator{\Det}{\mathsf{det}}     % Determinant.
