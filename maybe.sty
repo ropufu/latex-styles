@@ -3,6 +3,15 @@
 \ProvidesPackage{maybe}[2018/25/08 v0.91 (G Sokolov)]
 \PackageInfo{maybe}{Some probability and statistics stuff and common notation}
 
+\newcommand{\maybehistvlabelrelpos}{0.5}
+\newcommand{\maybehistvlabeloffset}{0.0}
+
+\DeclareOption{histabove}{
+    \renewcommand{\maybehistvlabelrelpos}{1.0}
+    \renewcommand{\maybehistvlabeloffset}{0.4}
+}
+\ProcessOptions\relax
+
 \RequirePackage{amsmath}
 \RequirePackage{mathabx} % For absolute continuity symbol.
 \RequirePackage{tikz}
@@ -418,7 +427,7 @@
     \pgfmathsetmacro{\histBarHeight}{{#4 / (#3 - #2)}}
     \pgfmathsetmacro{\histBarMiddleX}{{0.5*#2 + 0.5*#3}}
     \draw[bar] (\xscale*#2, 0) rectangle (\xscale*#3, \yscale*\histBarHeight);
-    \draw (\xscale*\histBarMiddleX, \yscale*0.5*\histBarHeight) node[#1] {#5};
+    \draw (\xscale*\histBarMiddleX, \yscale*\maybehistvlabelrelpos*\histBarHeight + \maybehistvlabeloffset) node[#1] {#5};
 } % \newcommand
 
 % Draw a box plot.
