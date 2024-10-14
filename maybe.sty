@@ -487,3 +487,31 @@
         \multicolumn{1}{c}{}      \\ \cline{3-3}
     \end{tabular}
 } % \newcommand
+
+
+\newcommand{\drawtwobranches}[3][1.0]{
+    \draw[bend left=15]  (\xpos, \ypos) to (\xpos + \rowWidth, \ypos + #1 * \rowHeight) node[right, fill=white, align=left] {#2};
+    \draw[bend right=15] (\xpos, \ypos) to (\xpos + \rowWidth, \ypos - #1 * \rowHeight) node[right, fill=white, align=left] {#3};
+} % \newcommand
+
+\newcommand{\drawthreebranches}[4][1.0]{
+    \draw[bend left=15]  (\xpos, \ypos) to (\xpos + \rowWidth, \ypos + #1 * \rowHeight) node[right, fill=white, align=left] {#2};
+    \draw  (\xpos, \ypos) to (\xpos + \rowWidth, \ypos) node[right, fill=white, align=left] {#3};
+    \draw[bend right=15] (\xpos, \ypos) to (\xpos + \rowWidth, \ypos - #1 * \rowHeight) node[right, fill=white, align=left] {#4};
+} % \newcommand
+
+\newcommand{\drawfourbranches}[5][1.0]{
+    \draw[bend left=15]  (\xpos, \ypos) to (\xpos + \rowWidth, \ypos + 3 * #1 * \rowHeight) node[right, fill=white, align=left] {#2};
+    \draw[bend left=5]  (\xpos, \ypos) to (\xpos + \rowWidth, \ypos + 1 * #1 * \rowHeight) node[right, fill=white, align=left] {#3};
+    \draw[bend right=5] (\xpos, \ypos) to (\xpos + \rowWidth, \ypos - 1 * #1 * \rowHeight) node[right, fill=white, align=left] {#4};
+    \draw[bend right=15] (\xpos, \ypos) to (\xpos + \rowWidth, \ypos - 3 * #1 * \rowHeight) node[right, fill=white, align=left] {#5};
+} % \newcommand
+
+\newcommand{\drawsixbranches}[7][1.0]{
+    \draw[bend left=15]  (\xpos, \ypos) to (\xpos + \rowWidth, \ypos + 5 * #1 * \rowHeight) node[right, fill=white, align=left] {#2};
+    \draw[bend left=10]  (\xpos, \ypos) to (\xpos + \rowWidth, \ypos + 3 * #1 * \rowHeight) node[right, fill=white, align=left] {#3};
+    \draw[bend left=5]  (\xpos, \ypos) to (\xpos + \rowWidth, \ypos + 1 * #1 * \rowHeight) node[right, fill=white, align=left] {#4};
+    \draw[bend right=5] (\xpos, \ypos) to (\xpos + \rowWidth, \ypos - 1 * #1 * \rowHeight) node[right, fill=white, align=left] {#5};
+    \draw[bend right=10] (\xpos, \ypos) to (\xpos + \rowWidth, \ypos - 3 * #1 * \rowHeight) node[right, fill=white, align=left] {#6};
+    \draw[bend right=15] (\xpos, \ypos) to (\xpos + \rowWidth, \ypos - 5 * #1 * \rowHeight) node[right, fill=white, align=left] {#7};
+} % \newcommand
