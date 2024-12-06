@@ -358,6 +358,7 @@
 % Arguments:
 % -- 1 (defaults to empty): axis label.
 % -- 2: range of x-coordinates.
+% -- 3L y-offset.
 % Note: all lists should be comma-separated.
 % Required styles:
 % -- arr: for arrow styling;
@@ -366,9 +367,9 @@
 % -- \xscale: multiplier for x-coordinates.
 % -- \yscale: multiplier for y-coordinates.
 % Example. \maybeHAxis[~values of $\ensuremath{X}$]{17, 29};
-\newcommand{\maybeHAxis}[2][]{%
+\newcommand{\maybeHAxis}[3][]{%
     % ~~ Axis ~~
-    \draw[->, arr] ({\xscale*min(#2) - 0.3}, 0) -- ({\xscale*max(#2) + 0.8}, 0) node[right] {#1};
+    \draw[->, arr] ({\xscale*min(#2) - 0.3}, \yscale*#3) -- ({\xscale*max(#2) + 0.8}, \yscale*#3) node[right] {#1};
 } % \newcommand
 
 % Draw a point mass function.
@@ -378,6 +379,7 @@
 % -- 3: list of x-coordinates.
 % -- 4: list of y-coordinates.
 % -- 5: list of y-labels.
+% -- 6: y-offset.
 % Note: all lists should be comma-separated.
 % Required styles:
 % -- arr: for arrow styling.
@@ -386,7 +388,7 @@
 % Required variables:
 % -- \xscale: multiplier for x-coordinates.
 % -- \yscale: multiplier for y-coordinates.
-\newcommand{\maybeVBars}[5][1pt]{%
+\newcommand{\maybeVBars}[6][1pt]{%
     \pgfmathtruncatemacro{\tempMaybeLastIndex}{#2 - 1}
     % ~~ Bars ~~
 	\foreach \i in {0, ..., \tempMaybeLastIndex} {
@@ -396,9 +398,9 @@
         \let\tempYcoordinate\pgfmathresult;
         \pgfmathparse{{#5}[\i]};
         \let\tempYlabel\pgfmathresult;
-        \draw[dot] (\xscale*\tempXcoordinate, \yscale*\tempYcoordinate) circle (#1);
-        \draw[bar] (\xscale*\tempXcoordinate, 0) -- (\xscale*\tempXcoordinate, \yscale*\tempYcoordinate);
-        \draw (\xscale*\tempXcoordinate, \yscale*\tempYcoordinate) node[above] {\tempYlabel};
+        \draw[dot] (\xscale*\tempXcoordinate, \yscale*#6 + \yscale*\tempYcoordinate) circle (#1);
+        \draw[bar] (\xscale*\tempXcoordinate, \yscale*#6) -- (\xscale*\tempXcoordinate, \yscale*#6 + \yscale*\tempYcoordinate);
+        \draw (\xscale*\tempXcoordinate, \yscale*#6 + \yscale*\tempYcoordinate) node[above] {\tempYlabel};
     } % \foreach
 } % \newcommand
 
@@ -409,6 +411,7 @@
 % -- 3: list of x-coordinates.
 % -- 4: list of y-coordinates.
 % -- 5: list of y-labels.
+% -- 6: y-offset.
 % Note: all lists should be comma-separated.
 % Required styles:
 % -- arr: for arrow styling.
@@ -417,12 +420,12 @@
 % Required variables:
 % -- \xscale: multiplier for x-coordinates.
 % -- \yscale: multiplier for y-coordinates.
-% Example. \maybePMF[~values of $\ensuremath{X}$]{3}{1, 2, 3}{"1", "2", "3"}{1/2, 1/3, 1/6}{"0.5", "0.333", "0.167"};
-\newcommand{\maybePMF}[5][]{%
+% Example. \maybePMF[~values of $\ensuremath{X}$]{3}{1, 2, 3}{"1", "2", "3"}{1/2, 1/3, 1/6}{"0.5", "0.333", "0.167"}{0};
+\newcommand{\maybePMF}[6][]{%
     % ~~ Axis ~~
-    \maybeHAxis[#1]{#3};
+    \maybeHAxis[#1]{#3}{#6};
     % ~~ Bars ~~
-	\maybeVBars{#2}{#3}{#4}{#5};
+	\maybeVBars{#2}{#3}{#4}{#5}{#6};
 } % \newcommand
 
 % Draw a histogram rectangle.
