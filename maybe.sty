@@ -3,12 +3,12 @@
 \ProvidesPackage{maybe}[2018/25/08 v0.91 (G Sokolov)]
 \PackageInfo{maybe}{Some probability and statistics stuff and common notation}
 
-\newcommand{\maybehistvlabelrelpos}{0.5}
-\newcommand{\maybehistvlabeloffset}{0.0}
+\newcommand{\maybe@histvlabelrelpos}{0.5}
+\newcommand{\maybe@histvlabeloffset}{0.0}
 
 \DeclareOption{histabove}{
-    \renewcommand{\maybehistvlabelrelpos}{1.0}
-    \renewcommand{\maybehistvlabeloffset}{0.4}
+    \renewcommand{\maybe@histvlabelrelpos}{1.0}
+    \renewcommand{\maybe@histvlabeloffset}{0.4}
 }
 \ProcessOptions\relax
 
@@ -431,19 +431,24 @@
 % Draw a histogram rectangle.
 % Arguments:
 % -- 1 (defaults to empty): style for label node.
-% -- 2: left x-coordinate of the rectangle.
-% -- 3: right x-coordinate of the rectangle.
+% -- 2: range of x-coordinates of the rectangle.
+% -- 3: y-offset.
 % -- 4: area of the rectangle.
 % -- 5: label for the rectangle.
 % Required variables:
 % -- \xscale: multiplier for x-coordinates.
 % -- \yscale: multiplier for y-coordinates.
-\newcommand{\maybeHistBar}[5][]{%
-    \pgfmathsetmacro{\histBarHeight}{{#4 / (#3 - #2)}}
-    \pgfmathsetmacro{\histBarMiddleX}{{0.5*#2 + 0.5*#3}}
-    \draw[bar] (\xscale*#2, 0) rectangle (\xscale*#3, \yscale*\histBarHeight);
-    \draw (\xscale*\histBarMiddleX, \yscale*\maybehistvlabelrelpos*\histBarHeight + \maybehistvlabeloffset) node[#1] {#5};
+\newcommand{\maybeHHistBar}[5][]{%
+    \pgfmathsetmacro{\maybe@a}{{\xscale * min(#2)}}
+    \pgfmathsetmacro{\maybe@b}{{\xscale * max(#2)}}
+    \pgfmathsetmacro{\maybe@c}{0.5 * \maybe@a + 0.5 * \maybe@b}
+    \pgfmathsetmacro{\maybe@y}{{\yscale * (#3)}}
+    \pgfmathsetmacro{\maybe@width}{\maybe@b - \maybe@a}
+    \pgfmathsetmacro{\maybe@height}{{\yscale * (#4) / \maybe@width}}
+    \draw[bar] (\maybe@a, \maybe@y + 0) rectangle (\maybe@b, \maybe@y + \maybe@height);
+    \draw (\maybe@c, \maybe@y + \maybe@histvlabelrelpos * \maybe@height + \maybe@histvlabeloffset) node[#1] {#5};
 } % \newcommand
+\newcommand{\maybeHistBar}[5][]{\maybeHHistBar[#1]{#2}{#3}{#4}{#5}}
 
 % Draw a box plot.
 % Arguments:
