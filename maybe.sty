@@ -3,13 +3,19 @@
 \ProvidesPackage{maybe}[2018/25/08 v0.91 (G Sokolov)]
 \PackageInfo{maybe}{Some probability and statistics stuff and common notation}
 
-\newcommand{\maybe@histvlabelrelpos}{0.5}
-\newcommand{\maybe@histvlabeloffset}{0.0}
-
-\DeclareOption{histabove}{
+\newcommand{\maybe@histvlabelrelpos}{1.0}
+\newcommand{\maybe@histvlabeloffset}{0.4}
+\newcommand{\maybehistabove}{
     \renewcommand{\maybe@histvlabelrelpos}{1.0}
     \renewcommand{\maybe@histvlabeloffset}{0.4}
 }
+\newcommand{\maybehistcenter}{
+    \renewcommand{\maybe@histvlabelrelpos}{0.5}
+    \renewcommand{\maybe@histvlabeloffset}{0.0}
+}
+
+\DeclareOption{histabove}{\maybehistabove}
+\DeclareOption{histcenter}{\maybehistcenter}
 \ProcessOptions\relax
 
 \RequirePackage{amsmath}
@@ -434,11 +440,12 @@
 % -- 2: range of x-coordinates of the rectangle.
 % -- 3: y-offset.
 % -- 4: area of the rectangle.
-% -- 5: label for the rectangle.
 % Required variables:
 % -- \xscale: multiplier for x-coordinates.
 % -- \yscale: multiplier for y-coordinates.
-\newcommand{\maybeHHistBar}[5][]{%
+% Required styles:
+% -- bar: rectangle style.
+\newcommand{\maybeVHistBar}[4][]{%
     \pgfmathsetmacro{\maybe@a}{{\xscale * min(#2)}}
     \pgfmathsetmacro{\maybe@b}{{\xscale * max(#2)}}
     \pgfmathsetmacro{\maybe@c}{0.5 * \maybe@a + 0.5 * \maybe@b}
@@ -446,9 +453,9 @@
     \pgfmathsetmacro{\maybe@width}{\maybe@b - \maybe@a}
     \pgfmathsetmacro{\maybe@height}{{\yscale * (#4) / \maybe@width}}
     \draw[bar] (\maybe@a, \maybe@y + 0) rectangle (\maybe@b, \maybe@y + \maybe@height);
-    \draw (\maybe@c, \maybe@y + \maybe@histvlabelrelpos * \maybe@height + \maybe@histvlabeloffset) node[#1] {#5};
+    \draw (\maybe@c, \maybe@y + \maybe@histvlabelrelpos * \maybe@height + \maybe@histvlabeloffset) node[#1] {#4};
 } % \newcommand
-\newcommand{\maybeHistBar}[5][]{\maybeHHistBar[#1]{#2}{#3}{#4}{#5}}
+\newcommand{\maybeHistBar}[4][]{\maybeVHistBar[#1]{#2}{#3}{#4}}
 
 % Draw a box plot.
 % Arguments:
