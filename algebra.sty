@@ -5,6 +5,7 @@
 
 \RequirePackage{amsmath}
 \RequirePackage{amssymb}
+\RequirePackage{bm}
 
 
 \newcommand{\abs}[1]{\lvert#1\rvert}
@@ -14,11 +15,11 @@
 \newcommand{\floor}[1]{\left\lfloor#1\right\rfloor}
 
 \newcommand{\arr}[1]{\overrightarrow{#1\phantom{|}}}
-\renewcommand{\v}[1]{\boldsymbol{\mathbf{#1}}}
-\renewcommand{\vec}[1]{\langle #1 \rangle}
-\newcommand{\bigvec}[1]{\big\langle #1 \big\rangle}
-\newcommand{\Bigvec}[1]{\Big\langle #1 \Big\rangle}
-\newcommand{\Biggvec}[1]{\Bigg\langle #1 \Bigg\rangle}
+\newcommand{\bvec}[1]{{\bm{#1}}}
+\newcommand{\tuple}[1]{\langle #1 \rangle}
+\newcommand{\bigtuple}[1]{\big\langle #1 \big\rangle}
+\newcommand{\Bigtuple}[1]{\Big\langle #1 \Big\rangle}
+\newcommand{\Biggtuple}[1]{\Bigg\langle #1 \Bigg\rangle}
 \newcommand{\point}[1]{(#1)}
 \newcommand{\dotp}{\boldsymbol{\cdot}}
 \newcommand{\crossp}{\times}
@@ -29,7 +30,7 @@
 \newcommand{\ppartialof}[3]{\frac{\partial^2 #1}{\partial #2 \, \partial #3}}
 \newcommand{\pppartialof}[4]{\frac{\partial^3 #1}{\partial #2 \, \partial #3 \, \partial #4}}
 
-\newcommand{\crossvec}[3][ccc]{%
+\newcommand{\crossijk}[3][ccc]{%
 \begin{vmatrix}
     \begin{array}{#1}
         \,\v{i} & \v{j} & \v{k}\, \\
