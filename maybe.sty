@@ -3,22 +3,26 @@
 \ProvidesPackage{maybe}[2018/25/08 v0.91 (G Sokolov)]
 \PackageInfo{maybe}{Some probability and statistics stuff and common notation}
 
-\newcommand{\maybe@histvlabelrelpos}{1.0}
-\newcommand{\maybe@histvlabeloffset}{0.4}
+\newif\ifmaybe@histabove
+\newif\ifmaybe@histcenter
 \newcommand{\maybehistabove}{
-    \renewcommand{\maybe@histvlabelrelpos}{1.0}
-    \renewcommand{\maybe@histvlabeloffset}{0.4}
+    \maybe@histabovetrue
+    \maybe@histcenterfalse
 }
 \newcommand{\maybehistcenter}{
-    \renewcommand{\maybe@histvlabelrelpos}{0.5}
-    \renewcommand{\maybe@histvlabeloffset}{0.0}
+    \maybe@histabovefalse
+    \maybe@histcentertrue
 }
+\maybehistabove % Default behavior.
+
 
 \DeclareOption{histabove}{\maybehistabove}
 \DeclareOption{histcenter}{\maybehistcenter}
 \ProcessOptions\relax
 
 \RequirePackage{amsmath}
+\RequirePackage{ifthen}
+\RequirePackage{listofitems}
 \RequirePackage{mathabx} % For absolute continuity symbol.
 \RequirePackage{tikz}
 \usetikzlibrary{calc}
@@ -26,14 +30,54 @@
 \usetikzlibrary{backgrounds}
 \usetikzlibrary{patterns}
 
-% ~~ Defaults ~~
-\tikzset{bar/.style={thick, fill=white}}
-\tikzset{box/.style={thick, fill=white}}
-\tikzset{median/.style={thick}}
-\tikzset{whisk/.style={thick}}
-\tikzset{wline/.style={thick}}
-\tikzset{dot/.style={color=black, fill=black}}
-\tikzset{arr/.style={}}
+% ~~ TikZ styles ~~
+\tikzset{maybe@barstyle/.style={thick, fill=white}}
+\tikzset{maybe@boxstyle/.style={thick, fill=white}}
+\tikzset{maybe@medianstyle/.style={thick}}
+\tikzset{maybe@whiskerstyle/.style={thick}}
+\tikzset{maybe@whisklinestyle/.style={thick}}
+\tikzset{maybe@dotstyle/.style={color=black, fill=black}}
+\tikzset{maybe@axisstyle/.style={}}
+\tikzset{maybe@nodestlye/.style={}}
+
+\newcommand{\mayberesetstyles}{
+    \tikzset{maybe@barstyle/.style={thick, fill=white}}
+    \tikzset{maybe@boxstyle/.style={thick, fill=white}}
+    \tikzset{maybe@medianstyle/.style={thick}}
+    \tikzset{maybe@whiskerstyle/.style={thick}}
+    \tikzset{maybe@whisklinestyle/.style={thick}}
+    \tikzset{maybe@dotstyle/.style={color=black, fill=black}}
+    \tikzset{maybe@axisstyle/.style={}}
+    \tikzset{maybe@nodestlye/.style={}}
+}
+
+\newcommand{\maybesetaxisstyle}[1]{\tikzset{maybe@axisstyle/.style={#1}}}
+\newcommand{\maybesetnodestyle}[1]{\tikzset{maybe@nodestlye/.style={#1}}}
+
+
+\newcommand{\maybe@xscale}{1.0}
+\newcommand{\maybe@yscale}{1.0}
+\newcommand{\mayberesetscale}{
+    \renewcommand{\maybe@xscale}{1.0}
+    \renewcommand{\maybe@yscale}{1.0}
+}
+\newcommand{\maybesetscale}[2]{
+    \pgfmathparse{sign(#1)}
+    \ifnum\pgfmathresult=0
+        {\PackageError{maybe}{Zero x-scale not supported.}{\protect\maybesetscale\space only supports non-zero values.}}
+    \fi
+    \pgfmathparse{sign(#2)}
+    \ifnum\pgfmathresult=0
+        {\PackageError{maybe}{Zero y-scale not supported.}{\protect\maybesetscale\space only supports non-zero values.}}
+    \fi
+    \renewcommand{\maybe@xscale}{#1}
+    \renewcommand{\maybe@yscale}{#2}
+}
+\newcommand{\maybexscale}{\maybe@xscale}
+\newcommand{\maybeyscale}{\maybe@yscale}
+
+\newcommand{\maybe@axisextendfrom}{0.3}
+\newcommand{\maybe@axisextendto}{0.8}
 
 
 % ~~ Absolute continuity ~~
@@ -52,7 +96,7 @@
 
 % ~~ Operators ~~
 \let\Pr\relax
-\DeclareMathOperator{\Prop}{\mathsf{Prop}}      % Proportion Pr.
+\DeclareMathOperator{\Prop}{\mathsf{Prop}}    % Proportion Pr.
 \DeclareMathOperator{\Pr}{\mathsf{P}}         % Probability P.
 \DeclareMathOperator{\dist}{\mathsf{dist}}    % Distance.
 \DeclareMathOperator{\EV}{\mathsf{E}}         % Expected value.
@@ -108,10 +152,12 @@
 \newcommand{\mean}[1]{\bar{#1}}
 
 
+% ~~ Auxiliary ~~
+
 % Calculates Tikz coordinates for two intersecting circles. Arguments are: (x_1, y_1, r_1, x_2, y_2, r_2).
 % Creates variables: \upX, \upY, \downX, \downY, \upAngleA, \upAngleB, \downAngleA, \downAngleB.
 % Creates coordinates: (inter1), (inter2), (centerA), (centerB).
-\newcommand{\tikzCrossCircles}[6]{%
+\newcommand{\maybeCrossCircles}[6]{%
     \path
         let
             \n{ax} = {#1},
@@ -150,7 +196,9 @@
         (\n{downX}, \n{downY}) coordinate (inter2)
         (\n{ax}, \n{ay}) coordinate (centerA)
         (\n{bx}, \n{by}) coordinate (centerB);
-} % \tikzCrossCircles
+} % \maybeCrossCircles
+
+% ~~ Venn diagrams ~~
 
 % Draw a (left--right) Venn diagram.
 % Arguments:
@@ -160,7 +208,7 @@
 % -- 4: style outer.
 % -- 5: style left.
 % -- 6: style right.
-\newcommand{\tikzVennPizzaLR}[6]{
+\newcommand{\maybeVennPizzaLR}[6]{
     \draw[#4] #1 circle (#2);
     % Left hemisphere.
     \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))} in
@@ -168,7 +216,7 @@
     % Right hemisphere.
     \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))} in
         #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : -90+\n{phi}: #3) -- cycle;
-} % \tikzVennPizzaLR
+} % \maybeVennPizzaLR
 
 % Draw a (top--bottom) Venn diagram.
 % Arguments:
@@ -178,7 +226,7 @@
 % -- 4: style outer.
 % -- 5: style top.
 % -- 6: style bottom.
-\newcommand{\tikzVennPizzaTB}[6]{
+\newcommand{\maybeVennPizzaTB}[6]{
     \draw[#4] #1 circle (#2);
     % Top hemisphere.
     \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))} in
@@ -186,7 +234,7 @@
     % Bottom hemisphere.
     \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))} in
         #1 ++ (0-\n{phi} : #3) arc (0-\n{phi} : -180+\n{phi}: #3) -- cycle;
-} % \tikzVennPizzaTB
+} % \maybeVennPizzaTB
 
 % Draw a (left top--left bottom--right) Venn diagram.
 % Arguments:
@@ -197,7 +245,7 @@
 % -- 5: style left top.
 % -- 6: style left bottom.
 % -- 7: style right.
-\newcommand{\tikzVennPizzaLLR}[7]{
+\newcommand{\maybeVennPizzaLLR}[7]{
     \draw[#4] #1 circle (#2);
     % Left top quadrant.
     \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
@@ -208,7 +256,7 @@
     % Right hemisphere.
     \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))} in
         #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : -90+\n{phi}: #3) -- cycle;
-} % \tikzVennPizzaLR
+} % \maybeVennPizzaLLR
 
 % Draw a (left--right top--right bottom) Venn diagram.
 % Arguments:
@@ -219,7 +267,7 @@
 % -- 5: style left.
 % -- 6: style right top.
 % -- 7: style right bottom.
-\newcommand{\tikzVennPizzaLRR}[7]{
+\newcommand{\maybeVennPizzaLRR}[7]{
     \draw[#4] #1 circle (#2);
     % Left hemisphere.
     \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))} in
@@ -230,7 +278,7 @@
     % Right bottom quadrant.
     \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
         #1 ++ (-90+\n{phi} : #3) arc (-90+\n{phi} : 0-\n{phi} : #3) -- ($#1 + (\n{delta},-\n{delta})$) -- cycle;
-} % \tikzVennPizzaLRR
+} % \maybeVennPizzaLRR
 
 % Draws a (left top--right top--bottom) Venn diagram.
 % Arguments:
@@ -241,7 +289,7 @@
 % -- 5: style left top.
 % -- 6: style right top.
 % -- 7: style bottom.
-\newcommand{\tikzVennPizzaTTB}[7]{
+\newcommand{\maybeVennPizzaTTB}[7]{
     \draw[#4] #1 circle (#2);
     % Left top quadrant.
     \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
@@ -252,7 +300,7 @@
     % Bottom hemisphere.
     \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))} in
         #1 ++ (0-\n{phi} : #3) arc (0-\n{phi} : -180+\n{phi}: #3) -- cycle;
-} % \tikzVennPizzaLRR
+} % \maybeVennPizzaTTB
 
 % Draws a (top--left bottom--right bottom) Venn diagram.
 % Arguments:
@@ -263,7 +311,7 @@
 % -- 5: style top.
 % -- 6: style left bottom.
 % -- 7: style right bottom.
-\newcommand{\tikzVennPizzaTBB}[7]{
+\newcommand{\maybeVennPizzaTBB}[7]{
     \draw[#4] #1 circle (#2);
     % Left top quadrant.
     \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
@@ -274,7 +322,7 @@
     % Bottom hemisphere.
     \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))} in
         #1 ++ (0-\n{phi} : #3) arc (0-\n{phi} : -180+\n{phi}: #3) -- cycle;
-} % \tikzVennPizzaLRR
+} % \maybeVennPizzaTBB
 
 % Draws a (left top--left bottom--right top--right bottom) Venn diagram.
 % Arguments:
@@ -286,7 +334,7 @@
 % -- 6: style left bottom.
 % -- 7: style right top.
 % -- 8: style right bottom.
-\newcommand{\tikzVennPizzaLRTB}[8]{
+\newcommand{\maybeVennPizzaLRTB}[8]{
     \draw[#4] #1 circle (#2);
     % Left top quadrant.
     \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
@@ -300,165 +348,258 @@
     % Right bottom quadrant.
     \draw[#8] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
         #1 ++ (-90+\n{phi} : #3) arc (-90+\n{phi} : 0-\n{phi} : #3) -- ($#1 + (\n{delta},-\n{delta})$) -- cycle;
-} % \tikzVennPizzaLRR
+} % \maybeVennPizzaLRTB
 
-% Draw a horizontal sequence of labels.
-% -- 1 (defaults to empty): label style.
-% -- 2: number of coordinates.
-% -- 3: list of x-coordinates.
-% -- 4: list of x-labels.
-% -- 5: shared y-coordinate (not affected by \yscale).
-% Note: all lists should be comma-separated.
-% Required variables: \xscale and \yscale.
-\newcommand{\maybeXLabels}[5][]{%
-    \pgfmathtruncatemacro{\tempMaybeLastIndex}{#2 - 1}
-    % ~~ Bars ~~
-	\foreach \i in {0, ..., \tempMaybeLastIndex} {
-        \pgfmathparse{{#3}[\i]};
-        \let\tempXcoordinate\pgfmathresult;
-        \pgfmathparse{{#4}[\i]};
-        \let\tempXlabel\pgfmathresult;
-        \draw (\xscale*\tempXcoordinate, {\yscale*#5}) node[#1] {\tempXlabel};
-    } % \foreach
-} % \newcommand
+% ~~ Simple graphs ~~
 
-% Draw a horizontal sequence of labels.
-% -- 1 (defaults to empty): label style.
-% -- 2: number of coordinates.
-% -- 3: list of y-coordinates.
-% -- 4: list of y-labels.
-% -- 5: shared x-coordinate (not affected by \xscale).
-% Note: all lists should be comma-separated.
-% Required variables:
-% Required variables: \xscale and \yscale.
-\newcommand{\maybeYLabels}[5][]{%
-    \pgfmathtruncatemacro{\tempMaybeLastIndex}{#2 - 1}
-    % ~~ Bars ~~
-	\foreach \i in {0, ..., \tempMaybeLastIndex} {
-        \pgfmathparse{{#3}[\i]};
-        \let\tempYcoordinate\pgfmathresult;
-        \pgfmathparse{{#4}[\i]};
-        \let\tempYlabel\pgfmathresult;
-        \draw ({\xscale*#5}, \yscale*\tempYcoordinate) node[#1] {\tempYlabel};
-    } % \foreach
-} % \newcommand
-
-% Draw a horizontal sequence of ticks (vertical lines).
-% -- 1 (defaults to empty): line style.
-% -- 2: number of coordinates.
-% -- 3: list of x-coordinates.
-% -- 4: range of y-coordinates.
-% Note: all lists should be comma-separated.
-% Required variables:
-% -- \xscale: multiplier for x-coordinates.
-\newcommand{\maybeXTicks}[4][]{%
-    \pgfmathtruncatemacro{\tempMaybeLastIndex}{#2 - 1}
-    \pgfmathsetmacro{\tempYFrom}{min(#4)}
-    \pgfmathsetmacro{\tempYTo}{max(#4)}
-    % ~~ Ticks ~~
-	\foreach \i in {0, ..., \tempMaybeLastIndex} {
-        \pgfmathparse{{#3}[\i]};
-        \let\tempXcoordinate\pgfmathresult;
-        \draw[#1] (\xscale*\tempXcoordinate, \yscale*\tempYFrom) -- (\xscale*\tempXcoordinate, \yscale*\tempYTo);
-    } % \foreach
-} % \newcommand
-
-% Draw a point mass function.
+% Draw a horizontal axis pointing to the right if \maybexscale > 0 and left if \maybexscale < 0.
 % Arguments:
 % -- 1 (defaults to empty): axis label.
 % -- 2: range of x-coordinates.
-% -- 3L y-offset.
+% -- 3: y-location.
 % Note: all lists should be comma-separated.
-% Required styles:
-% -- arr: for arrow styling;
-% -- tick: for tick styling.
-% Required variables:
-% -- \xscale: multiplier for x-coordinates.
-% -- \yscale: multiplier for y-coordinates.
-% Example. \maybeHAxis[~values of $\ensuremath{X}$]{17, 29};
+% Example: \maybeHAxis[$X$]{17, 29}{0};
 \newcommand{\maybeHAxis}[3][]{%
-    % ~~ Axis ~~
-    \draw[->, arr] ({\xscale*min(#2) - 0.3}, \yscale*#3) -- ({\xscale*max(#2) + 0.8}, \yscale*#3) node[right] {#1};
-} % \newcommand
+    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
+    \ifthenelse{\equal{\maybe@axissign}{1}}%
+        {\draw[->, maybe@axisstyle]
+            ({\maybe@xscale * min(#2) - \maybe@axisextendfrom}, {\maybe@yscale * (#3)}) --
+            ({\maybe@xscale * max(#2) + \maybe@axisextendto}, {\maybe@yscale * (#3)}) node[right, maybe@nodestlye] {#1};}{}
+    \ifthenelse{\equal{\maybe@axissign}{-1}}%
+        {\draw[->, maybe@axisstyle]
+            ({\maybe@xscale * min(#2) + \maybe@axisextendfrom}, {\maybe@yscale * (#3)}) --
+            ({\maybe@xscale * max(#2) - \maybe@axisextendto}, {\maybe@yscale * (#3)}) node[left, maybe@nodestlye] {#1};}{}
+} % \maybeHAxis
 
-% Draw a point mass function.
-% Arguments:
-% -- 1 (defaults to 1pt): point radius.
-% -- 2: number of coordinates.
-% -- 3: list of x-coordinates.
-% -- 4: list of y-coordinates.
-% -- 5: list of y-labels.
-% -- 6: y-offset.
-% Note: all lists should be comma-separated.
-% Required styles:
-% -- arr: for arrow styling.
-% -- dot: for top circle styling.
-% -- bar: for vertical bar styling.
-% Required variables:
-% -- \xscale: multiplier for x-coordinates.
-% -- \yscale: multiplier for y-coordinates.
-\newcommand{\maybeVBars}[6][1pt]{%
-    \pgfmathtruncatemacro{\tempMaybeLastIndex}{#2 - 1}
-    % ~~ Bars ~~
-	\foreach \i in {0, ..., \tempMaybeLastIndex} {
-        \pgfmathparse{{#3}[\i]};
-        \let\tempXcoordinate\pgfmathresult;
-        \pgfmathparse{{#4}[\i]};
-        \let\tempYcoordinate\pgfmathresult;
-        \pgfmathparse{{#5}[\i]};
-        \let\tempYlabel\pgfmathresult;
-        \draw[dot] (\xscale*\tempXcoordinate, \yscale*#6 + \yscale*\tempYcoordinate) circle (#1);
-        \draw[bar] (\xscale*\tempXcoordinate, \yscale*#6) -- (\xscale*\tempXcoordinate, \yscale*#6 + \yscale*\tempYcoordinate);
-        \draw (\xscale*\tempXcoordinate, \yscale*#6 + \yscale*\tempYcoordinate) node[above] {\tempYlabel};
-    } % \foreach
-} % \newcommand
-
-% Draw a point mass function.
+% Draw a horizontal axis pointing to the right if \maybexscale > 0 and left if \maybexscale < 0.
 % Arguments:
 % -- 1 (defaults to empty): axis label.
-% -- 2: number of coordinates.
-% -- 3: list of x-coordinates.
-% -- 4: list of y-coordinates.
-% -- 5: list of y-labels.
-% -- 6: y-offset.
+% -- 2: range of y-coordinates.
+% -- 3: x-location.
 % Note: all lists should be comma-separated.
-% Required styles:
-% -- arr: for arrow styling.
-% -- dot: for top circle styling.
-% -- bar: for vertical bar styling.
-% Required variables:
-% -- \xscale: multiplier for x-coordinates.
-% -- \yscale: multiplier for y-coordinates.
-% Example. \maybePMF[~values of $\ensuremath{X}$]{3}{1, 2, 3}{"1", "2", "3"}{1/2, 1/3, 1/6}{"0.5", "0.333", "0.167"}{0};
-\newcommand{\maybePMF}[6][]{%
-    % ~~ Axis ~~
-    \maybeHAxis[#1]{#3}{#6};
-    % ~~ Bars ~~
-	\maybeVBars{#2}{#3}{#4}{#5}{#6};
-} % \newcommand
+% Example: \maybeVAxis[$Y$]{17, 29}{0};
+\newcommand{\maybeVAxis}[3][]{%
+    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
+    \ifthenelse{\equal{\maybe@axissign}{1}}%
+        {\draw[->, maybe@axisstyle]
+            ({\maybe@xscale * (#3)}, {\maybe@yscale * min(#2) - \maybe@axisextendfrom}) --
+            ({\maybe@xscale * (#3)}, {\maybe@yscale * max(#2) + \maybe@axisextendto}) node[above, maybe@nodestlye] {#1};}
+        {\draw[->, maybe@axisstyle]
+            ({\maybe@xscale * (#3)}, {\maybe@yscale * min(#2) + \maybe@axisextendfrom}) --
+            ({\maybe@xscale * (#3)}, {\maybe@yscale * max(#2) - \maybe@axisextendto}) node[below, maybe@nodestlye] {#1};}
+} % \maybeVAxis
 
-% Draw a histogram rectangle.
+% Draw a horizontal sequence of labels.
+% -- 1 (defaults to 0): y-offset (not affected by \maybeyscale).
+% -- 2: list of x-coordinates.
+% -- 3: list of x-labels.
+% -- 4: shared y-location.
+% Note: all lists should be comma-separated.
+\newcommand{\maybeHLabels}[4][0]{%
+    \readlist\maybe@temp@list{#2}
+    \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
+    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
+    % ~~ Bars ~~
+	\foreach \i in {0, ..., \maybe@temp@lastindex} {
+        \pgfmathparse{{#2}[\i]};
+        \let\maybe@temp@xcoordinate\pgfmathresult;
+        \pgfmathparse{{#3}[\i]};
+        \let\maybe@temp@xlabel\pgfmathresult;
+        \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#4) + \maybe@axissign * (#1)}) node[maybe@nodestlye] {\maybe@temp@xlabel};
+    } % \foreach
+} % \maybeHLabels
+
+% Draw a horizontal sequence of labels.
+% -- 1 (defaults to 0): x-offset (not affected by \maybexscale).
+% -- 3: list of y-coordinates.
+% -- 4: list of y-labels.
+% -- 5: shared x-location.
+% Note: all lists should be comma-separated.
+\newcommand{\maybeVLabels}[4][0]{%
+    \readlist\maybe@temp@list{#2}
+    \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
+    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
+    % ~~ Bars ~~
+	\foreach \i in {0, ..., \maybe@temp@lastindex} {
+        \pgfmathparse{{#2}[\i]};
+        \let\maybe@temp@ycoordinate\pgfmathresult;
+        \pgfmathparse{{#3}[\i]};
+        \let\maybe@temp@ylabel\pgfmathresult;
+        \draw ({\maybe@xscale * (#4) + \maybe@axissign * (#1)}, \maybe@yscale * \maybe@temp@ycoordinate) node[maybe@nodestlye] {\maybe@temp@ylabel};
+    } % \foreach
+} % \maybeYLabels
+
+% Draw a horizontal sequence of ticks (vertical lines).
+% -- 1 (defaults to -0.1, 0): y-span for the ticks (comma-separated list, not affected by \maybeyscale).
+% -- 2: list of x-coordinates.
+% -- 3: y-location of the axis.
+\newcommand{\maybeHTicks}[2][-0.1, 0]{%
+    \readlist\maybe@temp@list{#2}
+    \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
+    \pgfmathsetmacro{\maybe@temp@yfrom}{min(#1)}
+    \pgfmathsetmacro{\maybe@temp@yto}{max(#1)}
+    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
+    % ~~ Ticks ~~
+	\foreach \i in {0, ..., \maybe@temp@lastindex} {
+        \pgfmathparse{{#2}[\i]};
+        \let\maybe@temp@xcoordinate\pgfmathresult;
+        \draw
+            (\maybe@xscale * \maybe@temp@xcoordinate, \maybe@axissign * \maybe@temp@yfrom) --
+            (\maybe@xscale * \maybe@temp@xcoordinate, \maybe@axissign * \maybe@temp@yto);
+    } % \foreach
+} % \maybeHTicks
+
+% Draw a vertical sequence of ticks (vertical lines).
+% -- 1 (defaults to -0.1, 0): x-span for the ticks (comma-separated list, not affected by \maybexscale).
+% -- 2: list of y-coordinates.
+% -- 3: x-location of the axis.
+\newcommand{\maybeVTicks}[2][-0.1, 0]{%
+    \readlist\maybe@temp@list{#2}
+    \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
+    \pgfmathsetmacro{\maybe@temp@xfrom}{min(#1)}
+    \pgfmathsetmacro{\maybe@temp@xto}{max(#1)}
+    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
+    % ~~ Ticks ~~
+	\foreach \i in {0, ..., \maybe@temp@lastindex} {
+        \pgfmathparse{{#2}[\i]};
+        \let\maybe@temp@ycoordinate\pgfmathresult;
+        \draw
+            (\maybe@axissign * \maybe@temp@xfrom, \maybe@yscale * \maybe@temp@ycoordinate) --
+            (\maybe@axissign * \maybe@temp@xto, \maybe@yscale * \maybe@temp@ycoordinate);
+    } % \foreach
+} % \maybeVTicks
+
+% Draw vertical lines.
 % Arguments:
-% -- 1 (defaults to empty): style for label node.
+% -- 1 (defaults to 1pt): point radius.
+% -- 2: list of x-coordinates.
+% -- 3: list of line lengths.
+% -- 4: list of labels.
+% -- 5: y-location of the axis.
+% Note: all lists should be comma-separated.
+\newcommand{\maybeVBars}[5][0pt]{%
+    \readlist\maybe@temp@list{#2}
+    \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
+    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
+    % ~~ Bars ~~
+	\foreach \i in {0, ..., \maybe@temp@lastindex} {
+        \pgfmathparse{{#2}[\i]};
+        \let\maybe@temp@xcoordinate\pgfmathresult;
+        \pgfmathparse{{#3}[\i]};
+        \let\maybe@temp@length\pgfmathresult;
+        \pgfmathparse{{#4}[\i]};
+        \let\maybe@temp@label\pgfmathresult;
+        \fill[maybe@dotstyle] (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#5 + \maybe@temp@length)}) circle (#1);
+
+        \ifnum\maybe@axissign=1
+            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#5 + \maybe@temp@length)}) node[above, maybe@nodestlye] {\maybe@temp@label};
+        \else
+            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#5 + \maybe@temp@length)}) node[below, maybe@nodestlye] {\maybe@temp@label};
+        \fi
+        \draw[maybe@barstyle]
+            (\maybe@xscale * \maybe@temp@xcoordinate, \maybe@yscale * #5) --
+            (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#5 + \maybe@temp@length)});
+    } % \foreach
+} % \maybeVBars
+
+% Draw horizontal lines.
+% Arguments:
+% -- 1 (defaults to 1pt): point radius.
+% -- 2: list of y-coordinates.
+% -- 3: list of line lengths.
+% -- 4: list of labels.
+% -- 5: x-location of the axis.
+% Note: all lists should be comma-separated.
+\newcommand{\maybeHBars}[5][0pt]{%
+    \readlist\maybe@temp@list{#2}
+    \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
+    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
+    % ~~ Bars ~~
+	\foreach \i in {0, ..., \maybe@temp@lastindex} {
+        \pgfmathparse{{#2}[\i]};
+        \let\maybe@temp@ycoordinate\pgfmathresult;
+        \pgfmathparse{{#3}[\i]};
+        \let\maybe@temp@length\pgfmathresult;
+        \pgfmathparse{{#4}[\i]};
+        \let\maybe@temp@label\pgfmathresult;
+        \fill[maybe@dotstyle] ({\maybe@xscale * (#5 + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) circle (#1);
+
+        \ifnum\maybe@axissign=1
+            \draw({\maybe@xscale * (#5 + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) node[right, maybe@nodestlye] {\maybe@temp@label};
+        \else
+            \draw({\maybe@xscale * (#5 + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) node[left, maybe@nodestlye] {\maybe@temp@label};
+        \fi
+        \draw[maybe@barstyle]
+            (\maybe@xscale * #5, \maybe@yscale * \maybe@temp@ycoordinate) --
+            ({\maybe@xscale * (#5 + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate);
+    } % \foreach
+} % \maybeHBars
+
+% Draw a vertical histogram rectangle.
+% Arguments:
+% -- 1 (defaults to argument #4): label for the rectangle.
 % -- 2: range of x-coordinates of the rectangle.
-% -- 3: y-offset.
+% -- 3: y-location of the axis.
 % -- 4: area of the rectangle.
-% Required variables:
-% -- \xscale: multiplier for x-coordinates.
-% -- \yscale: multiplier for y-coordinates.
-% Required styles:
-% -- bar: rectangle style.
-\newcommand{\maybeVHistBar}[4][]{%
-    \pgfmathsetmacro{\maybe@a}{{\xscale * min(#2)}}
-    \pgfmathsetmacro{\maybe@b}{{\xscale * max(#2)}}
+\newcommand{\maybeVHistBar}[4][@]{%
+    \pgfmathsetmacro{\maybe@a}{{\maybe@xscale * min(#2)}}
+    \pgfmathsetmacro{\maybe@b}{{\maybe@xscale * max(#2)}}
     \pgfmathsetmacro{\maybe@c}{0.5 * \maybe@a + 0.5 * \maybe@b}
-    \pgfmathsetmacro{\maybe@y}{{\yscale * (#3)}}
-    \pgfmathsetmacro{\maybe@width}{\maybe@b - \maybe@a}
-    \pgfmathsetmacro{\maybe@height}{{\yscale * (#4) / \maybe@width}}
-    \draw[bar] (\maybe@a, \maybe@y + 0) rectangle (\maybe@b, \maybe@y + \maybe@height);
-    \draw (\maybe@c, \maybe@y + \maybe@histvlabelrelpos * \maybe@height + \maybe@histvlabeloffset) node[#1] {#4};
-} % \newcommand
-\newcommand{\maybeHistBar}[4][]{\maybeVHistBar[#1]{#2}{#3}{#4}}
+    \pgfmathsetmacro{\maybe@y}{{\maybe@yscale * (#3)}}
+    \pgfmathsetmacro{\maybe@width}{{abs(\maybe@b - \maybe@a)}}
+    \pgfmathsetmacro{\maybe@height}{{\maybe@yscale * (#4) / \maybe@width}}
+    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
+    \draw[maybe@barstyle] (\maybe@a, \maybe@y + 0) rectangle (\maybe@b, \maybe@y + \maybe@height);
+    \ifmaybe@histabove
+        \ifnum\maybe@axissign=1
+            \ifthenelse{\equal{#1}{@}}{%
+                \draw (\maybe@c, \maybe@y + \maybe@height) node[above, maybe@nodestlye] {#4};}{%
+                \draw (\maybe@c, \maybe@y + \maybe@height) node[above, maybe@nodestlye] {#1};}
+        \else
+            \ifthenelse{\equal{#1}{@}}{%
+                \draw (\maybe@c, \maybe@y + \maybe@height) node[below, maybe@nodestlye] {#4};}{%
+                \draw (\maybe@c, \maybe@y + \maybe@height) node[below, maybe@nodestlye] {#1};}
+        \fi
+    \fi
+    \ifmaybe@histcenter
+        \ifthenelse{\equal{#1}{@}}{%
+            \draw (\maybe@c, \maybe@y + 0.5 * \maybe@height) node[maybe@nodestlye] {#4};}{%
+            \draw (\maybe@c, \maybe@y + 0.5 * \maybe@height) node[maybe@nodestlye] {#1};}
+    \fi
+} % \maybeVHistBar
+
+% Draw a horizontal histogram rectangle.
+% Arguments:
+% -- 1 (defaults to argument #4): label for the rectangle.
+% -- 2: range of y-coordinates of the rectangle.
+% -- 3: x-location of the axis.
+% -- 4: area of the rectangle.
+\newcommand{\maybeHHistBar}[4][@]{%
+    \pgfmathsetmacro{\maybe@a}{{\maybe@yscale * min(#2)}}
+    \pgfmathsetmacro{\maybe@b}{{\maybe@yscale * max(#2)}}
+    \pgfmathsetmacro{\maybe@c}{0.5 * \maybe@a + 0.5 * \maybe@b}
+    \pgfmathsetmacro{\maybe@x}{{\maybe@xscale * (#3)}}
+    \pgfmathsetmacro{\maybe@height}{{abs(\maybe@b - \maybe@a)}}
+    \pgfmathsetmacro{\maybe@width}{{\maybe@xscale * (#4) / \maybe@width}}
+    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
+    \draw[maybe@barstyle] (\maybe@x + 0, \maybe@a) rectangle (\maybe@x + \maybe@height, \maybe@b);
+    \ifmaybe@histabove
+        \ifnum\maybe@axissign=1
+            \ifthenelse{\equal{#1}{@}}{%
+                \draw (\maybe@x + \maybe@width, \maybe@c) node[right, maybe@nodestlye] {#4};}{%
+                \draw (\maybe@x + \maybe@width, \maybe@c) node[right, maybe@nodestlye] {#1};}
+        \else
+            \ifthenelse{\equal{#1}{@}}{%
+                \draw (\maybe@x + \maybe@width, \maybe@c) node[left, maybe@nodestlye] {#4};}{%
+                \draw (\maybe@x + \maybe@width, \maybe@c) node[left, maybe@nodestlye] {#1};}
+        \fi
+    \fi
+    \ifmaybe@histcenter
+        \ifthenelse{\equal{#1}{@}}{%
+            \draw (\maybe@x + 0.5 * \maybe@width, \maybe@c) node[maybe@nodestlye] {#4};}{%
+            \draw (\maybe@x + 0.5 * \maybe@width, \maybe@c) node[maybe@nodestlye] {#1};}
+    \fi
+} % \maybeHHistBar
 
 % Draw a box plot.
 % Arguments:
@@ -466,11 +607,6 @@
 % -- 2: height of the box.
 % -- 3: height of the whisker.
 % -- 4: y-coordinate.
-% Required styles:
-% -- box: for box styling.
-% -- mark: for median marker styling.
-% -- whisk: for whisker styling.
-% -- wline: for whisker line styling.
 % Required variables:
 % -- \xscale: multiplier for x-coordinates.
 % -- \yscale: multiplier for y-coordinates.
@@ -482,12 +618,12 @@
     \pgfmathparse{{#1}[4]}; \pgfmathsetmacro{\tempMaybeRight}{\pgfmathresult};
     \pgfmathsetmacro{\tempMaybeBoxWidth}{{\tempMaybeThird - \tempMaybeFirst}}
     % ~~ And now for the box plot ~~
-    \draw[box] (\xscale*\tempMaybeFirst, {\yscale*(#4 - 0.5*#2)}) rectangle (\xscale*\tempMaybeThird, {\yscale*(#4 + 0.5*#2)}); % The box itself.
-    \draw[median] (\xscale*\tempMaybeSecond, {\yscale*(#4 - 0.5*#2)}) -- (\xscale*\tempMaybeSecond, {\yscale*(#4 + 0.5*#2)});   % Median marker.
-    \draw[wline] (\xscale*\tempMaybeLeft, \yscale*#4) -- (\xscale*\tempMaybeFirst, \yscale*#4);
-    \draw[wline] (\xscale*\tempMaybeThird, \yscale*#4) -- (\xscale*\tempMaybeRight, \yscale*#4);
-    \draw[whisk] (\xscale*\tempMaybeLeft, {\yscale*(#4 - 0.5*#3)}) -- (\xscale*\tempMaybeLeft, {\yscale*(#4 + 0.5*#3)});        % Left whisker.
-    \draw[whisk] (\xscale*\tempMaybeRight, {\yscale*(#4 - 0.5*#3)}) -- (\xscale*\tempMaybeRight, {\yscale*(#4 + 0.5*#3)});      % Right whisker.
+    \draw[maybe@boxstyle] (\maybe@xscale * \tempMaybeFirst, {\yscale*(#4 - 0.5*#2)}) rectangle (\maybe@xscale * \tempMaybeThird, {\yscale*(#4 + 0.5*#2)}); % The box itself.
+    \draw[maybe@medianstyle] (\maybe@xscale * \tempMaybeSecond, {\yscale*(#4 - 0.5*#2)}) -- (\maybe@xscale * \tempMaybeSecond, {\yscale*(#4 + 0.5*#2)});   % Median marker.
+    \draw[maybe@whisklinestyle] (\maybe@xscale * \tempMaybeLeft, \yscale*#4) -- (\maybe@xscale * \tempMaybeFirst, \yscale*#4);  % Box to left whisker connector.
+    \draw[maybe@whisklinestyle] (\maybe@xscale * \tempMaybeThird, \yscale*#4) -- (\maybe@xscale * \tempMaybeRight, \yscale*#4); % Box to right whisker connector.
+    \draw[maybe@whiskerstyle] (\maybe@xscale * \tempMaybeLeft, {\yscale*(#4 - 0.5*#3)}) -- (\maybe@xscale * \tempMaybeLeft, {\yscale*(#4 + 0.5*#3)});        % Left whisker.
+    \draw[maybe@whiskerstyle] (\maybe@xscale * \tempMaybeRight, {\yscale*(#4 - 0.5*#3)}) -- (\maybe@xscale * \tempMaybeRight, {\yscale*(#4 + 0.5*#3)});      % Right whisker.
 } % \newcommand
 
 % ~~ Six-sided dice unwrapped ~~
