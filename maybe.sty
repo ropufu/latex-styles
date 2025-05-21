@@ -15,6 +15,26 @@
 }
 \maybehistabove % Default behavior.
 
+\newif\ifmaybe@ticksabove
+\newif\ifmaybe@ticksbelow
+\newif\ifmaybe@tickscenter
+\newcommand{\maybeticksabove}{
+    \maybe@ticksabovetrue
+    \maybe@ticksbelowfalse
+    \maybe@tickscenterfalse
+}
+\newcommand{\maybeticksbelow}{
+    \maybe@ticksabovefalse
+    \maybe@ticksbelowtrue
+    \maybe@tickscenterfalse
+}
+\newcommand{\maybetickscenter}{
+    \maybe@ticksabovefalse
+    \maybe@ticksbelowfalse
+    \maybe@tickscentertrue
+}
+\maybetickscenter % Default behavior.
+
 
 \DeclareOption{histabove}{\maybehistabove}
 \DeclareOption{histcenter}{\maybehistcenter}
@@ -39,6 +59,7 @@
 \tikzset{maybe@dotstyle/.style={color=black, fill=black}}
 \tikzset{maybe@axisstyle/.style={}}
 \tikzset{maybe@nodestlye/.style={}}
+\tikzset{maybe@tickstlye/.style={}}
 
 \newcommand{\mayberesetstyles}{
     \tikzset{maybe@barstyle/.style={thick, fill=white}}
@@ -49,10 +70,12 @@
     \tikzset{maybe@dotstyle/.style={color=black, fill=black}}
     \tikzset{maybe@axisstyle/.style={}}
     \tikzset{maybe@nodestlye/.style={}}
+    \tikzset{maybe@tickstlye/.style={}}
 }
 
 \newcommand{\maybesetaxisstyle}[1]{\tikzset{maybe@axisstyle/.style={#1}}}
 \newcommand{\maybesetnodestyle}[1]{\tikzset{maybe@nodestlye/.style={#1}}}
+\newcommand{\maybesettickstyle}[1]{\tikzset{maybe@tickstlye/.style={#1}}}
 
 
 \newcommand{\maybe@xscale}{1.0}
@@ -76,8 +99,15 @@
 \newcommand{\maybexscale}{\maybe@xscale}
 \newcommand{\maybeyscale}{\maybe@yscale}
 
-\newcommand{\maybe@axisextendfrom}{0.3}
-\newcommand{\maybe@axisextendto}{0.8}
+% ~~ QoL ~~
+% TODO: change everything to [ex] units and [xshift]/[yshift].
+\newcommand{\maybe@xaxisextendfrom}{0.3}
+\newcommand{\maybe@xaxisextendto}{0.8}
+\newcommand{\maybe@yaxisextendfrom}{0.1}
+\newcommand{\maybe@yaxisextendto}{0.3}
+\newcommand{\maybe@axisnodeoffset}{2.0ex}
+\newcommand{\maybe@tickoffset}{0.1}
+\newcommand{\maybe@barknobradius}{0pt}
 
 
 % ~~ Absolute continuity ~~
@@ -363,12 +393,12 @@
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
     \ifthenelse{\equal{\maybe@axissign}{1}}%
         {\draw[->, maybe@axisstyle]
-            ({\maybe@xscale * min(#2) - \maybe@axisextendfrom}, {\maybe@yscale * (#3)}) --
-            ({\maybe@xscale * max(#2) + \maybe@axisextendto}, {\maybe@yscale * (#3)}) node[right, maybe@nodestlye] {#1};}{}
+            ({\maybe@xscale * min(#2) - \maybe@xaxisextendfrom}, {\maybe@yscale * (#3)}) --
+            ({\maybe@xscale * max(#2) + \maybe@xaxisextendto}, {\maybe@yscale * (#3)}) node[right, maybe@nodestlye] {#1};}{}
     \ifthenelse{\equal{\maybe@axissign}{-1}}%
         {\draw[->, maybe@axisstyle]
-            ({\maybe@xscale * min(#2) + \maybe@axisextendfrom}, {\maybe@yscale * (#3)}) --
-            ({\maybe@xscale * max(#2) - \maybe@axisextendto}, {\maybe@yscale * (#3)}) node[left, maybe@nodestlye] {#1};}{}
+            ({\maybe@xscale * min(#2) + \maybe@xaxisextendfrom}, {\maybe@yscale * (#3)}) --
+            ({\maybe@xscale * max(#2) - \maybe@xaxisextendto}, {\maybe@yscale * (#3)}) node[left, maybe@nodestlye] {#1};}{}
 } % \maybeHAxis
 
 % Draw a horizontal axis pointing to the right if \maybexscale > 0 and left if \maybexscale < 0.
@@ -382,102 +412,123 @@
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
     \ifthenelse{\equal{\maybe@axissign}{1}}%
         {\draw[->, maybe@axisstyle]
-            ({\maybe@xscale * (#3)}, {\maybe@yscale * min(#2) - \maybe@axisextendfrom}) --
-            ({\maybe@xscale * (#3)}, {\maybe@yscale * max(#2) + \maybe@axisextendto}) node[above, maybe@nodestlye] {#1};}
+            ({\maybe@xscale * (#3)}, {\maybe@yscale * min(#2) - \maybe@yaxisextendfrom}) --
+            ({\maybe@xscale * (#3)}, {\maybe@yscale * max(#2) + \maybe@yaxisextendto}) node[above, maybe@nodestlye] {#1};}
         {\draw[->, maybe@axisstyle]
-            ({\maybe@xscale * (#3)}, {\maybe@yscale * min(#2) + \maybe@axisextendfrom}) --
-            ({\maybe@xscale * (#3)}, {\maybe@yscale * max(#2) - \maybe@axisextendto}) node[below, maybe@nodestlye] {#1};}
+            ({\maybe@xscale * (#3)}, {\maybe@yscale * min(#2) + \maybe@yaxisextendfrom}) --
+            ({\maybe@xscale * (#3)}, {\maybe@yscale * max(#2) - \maybe@yaxisextendto}) node[below, maybe@nodestlye] {#1};}
 } % \maybeVAxis
 
 % Draw a horizontal sequence of labels.
-% -- 1 (defaults to 0): y-offset (not affected by \maybeyscale).
+% -- 1 (defaults to argument #2): list of x-labels.
 % -- 2: list of x-coordinates.
-% -- 3: list of x-labels.
-% -- 4: shared y-location.
+% -- 3: shared y-location.
 % Note: all lists should be comma-separated.
-\newcommand{\maybeHLabels}[4][0]{%
+\newcommand{\maybeHLabels}[3][@]{%
     \readlist\maybe@temp@list{#2}
     \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
-    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
+    \pgfmathsetmacro{\maybe@temp@nodeoffset}{-sign(\maybe@yscale) * \maybe@axisnodeoffset}
     % ~~ Bars ~~
 	\foreach \i in {0, ..., \maybe@temp@lastindex} {
         \pgfmathparse{{#2}[\i]};
         \let\maybe@temp@xcoordinate\pgfmathresult;
-        \pgfmathparse{{#3}[\i]};
-        \let\maybe@temp@xlabel\pgfmathresult;
-        \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#4) + \maybe@axissign * (#1)}) node[maybe@nodestlye] {\maybe@temp@xlabel};
+        \ifthenelse{\equal{#1}{@}}{
+            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#3)}) node[yshift = \maybe@temp@nodeoffset, maybe@nodestlye] {$\maybe@temp@xcoordinate$};
+        }{
+            \pgfmathparse{{#1}[\i]};
+            \let\maybe@temp@xlabel\pgfmathresult;
+            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#3)}) node[yshift = \maybe@temp@nodeoffset, maybe@nodestlye] {\maybe@temp@xlabel};
+        }
     } % \foreach
 } % \maybeHLabels
 
 % Draw a horizontal sequence of labels.
-% -- 1 (defaults to 0): x-offset (not affected by \maybexscale).
-% -- 3: list of y-coordinates.
-% -- 4: list of y-labels.
-% -- 5: shared x-location.
+% -- 1 (defaults to argument #2): list of y-labels.
+% -- 2: list of y-coordinates.
+% -- 3: shared x-location.
 % Note: all lists should be comma-separated.
-\newcommand{\maybeVLabels}[4][0]{%
+\newcommand{\maybeVLabels}[3][@]{%
     \readlist\maybe@temp@list{#2}
     \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
-    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
+    \pgfmathsetmacro{\maybe@temp@nodeoffset}{-sign(\maybe@xscale) * \maybe@axisnodeoffset}
     % ~~ Bars ~~
 	\foreach \i in {0, ..., \maybe@temp@lastindex} {
         \pgfmathparse{{#2}[\i]};
         \let\maybe@temp@ycoordinate\pgfmathresult;
-        \pgfmathparse{{#3}[\i]};
-        \let\maybe@temp@ylabel\pgfmathresult;
-        \draw ({\maybe@xscale * (#4) + \maybe@axissign * (#1)}, \maybe@yscale * \maybe@temp@ycoordinate) node[maybe@nodestlye] {\maybe@temp@ylabel};
+        \ifthenelse{\equal{#1}{@}}{
+            \draw ({\maybe@xscale * (#3)}, \maybe@yscale * \maybe@temp@ycoordinate) node[xshift = \maybe@temp@nodeoffset, maybe@nodestlye] {$\maybe@temp@ycoordinate$};
+        }{
+            \pgfmathparse{{#1}[\i]};
+            \let\maybe@temp@ylabel\pgfmathresult;
+            \draw ({\maybe@xscale * (#3)}, \maybe@yscale * \maybe@temp@ycoordinate) node[xshift = \maybe@temp@nodeoffset, maybe@nodestlye] {\maybe@temp@ylabel};
+        }
     } % \foreach
-} % \maybeYLabels
+} % \maybeVLabels
 
 % Draw a horizontal sequence of ticks (vertical lines).
-% -- 1 (defaults to -0.1, 0): y-span for the ticks (comma-separated list, not affected by \maybeyscale).
-% -- 2: list of x-coordinates.
-% -- 3: y-location of the axis.
-\newcommand{\maybeHTicks}[2][-0.1, 0]{%
-    \readlist\maybe@temp@list{#2}
+% -- 1: list of x-coordinates.
+% -- 2: y-location of the axis.
+\newcommand{\maybeHTicks}[2]{%
+    \readlist\maybe@temp@list{#1}
     \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
-    \pgfmathsetmacro{\maybe@temp@yfrom}{min(#1)}
-    \pgfmathsetmacro{\maybe@temp@yto}{max(#1)}
-    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
+    \ifmaybe@ticksabove
+        \pgfmathsetmacro{\maybe@temp@yfrom}{0}
+        \pgfmathsetmacro{\maybe@temp@yto}{sign(\maybe@yscale) * \maybe@tickoffset}
+    \fi
+    \ifmaybe@ticksbelow
+        \pgfmathsetmacro{\maybe@temp@yfrom}{0}
+        \pgfmathsetmacro{\maybe@temp@yto}{-sign(\maybe@yscale) * \maybe@tickoffset}
+    \fi
+    \ifmaybe@tickscenter
+        \pgfmathsetmacro{\maybe@temp@yfrom}{-0.5 * sign(\maybe@yscale) * \maybe@tickoffset}
+        \pgfmathsetmacro{\maybe@temp@yto}{0.5 * sign(\maybe@yscale) * \maybe@tickoffset}
+    \fi
     % ~~ Ticks ~~
 	\foreach \i in {0, ..., \maybe@temp@lastindex} {
-        \pgfmathparse{{#2}[\i]};
+        \pgfmathparse{{#1}[\i]};
         \let\maybe@temp@xcoordinate\pgfmathresult;
-        \draw
-            (\maybe@xscale * \maybe@temp@xcoordinate, \maybe@axissign * \maybe@temp@yfrom) --
-            (\maybe@xscale * \maybe@temp@xcoordinate, \maybe@axissign * \maybe@temp@yto);
+        \draw[maybe@tickstlye]
+            (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#2) + \maybe@temp@yfrom}) --
+            (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#2) + \maybe@temp@yto});
     } % \foreach
 } % \maybeHTicks
 
 % Draw a vertical sequence of ticks (vertical lines).
-% -- 1 (defaults to -0.1, 0): x-span for the ticks (comma-separated list, not affected by \maybexscale).
-% -- 2: list of y-coordinates.
-% -- 3: x-location of the axis.
-\newcommand{\maybeVTicks}[2][-0.1, 0]{%
-    \readlist\maybe@temp@list{#2}
+% -- 1: list of y-coordinates.
+% -- 2: x-location of the axis.
+\newcommand{\maybeVTicks}[2]{%
+    \readlist\maybe@temp@list{#1}
     \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
-    \pgfmathsetmacro{\maybe@temp@xfrom}{min(#1)}
-    \pgfmathsetmacro{\maybe@temp@xto}{max(#1)}
-    \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
+    \ifmaybe@ticksabove
+        \pgfmathsetmacro{\maybe@temp@xfrom}{0}
+        \pgfmathsetmacro{\maybe@temp@xto}{sign(\maybe@xscale) * \maybe@tickoffset}
+    \fi
+    \ifmaybe@ticksbelow
+        \pgfmathsetmacro{\maybe@temp@xfrom}{0}
+        \pgfmathsetmacro{\maybe@temp@xto}{-sign(\maybe@xscale) * \maybe@tickoffset}
+    \fi
+    \ifmaybe@tickscenter
+        \pgfmathsetmacro{\maybe@temp@xfrom}{-0.5 * sign(\maybe@xscale) * \maybe@tickoffset}
+        \pgfmathsetmacro{\maybe@temp@xto}{0.5 * sign(\maybe@xscale) * \maybe@tickoffset}
+    \fi
     % ~~ Ticks ~~
 	\foreach \i in {0, ..., \maybe@temp@lastindex} {
-        \pgfmathparse{{#2}[\i]};
+        \pgfmathparse{{#1}[\i]};
         \let\maybe@temp@ycoordinate\pgfmathresult;
-        \draw
-            (\maybe@axissign * \maybe@temp@xfrom, \maybe@yscale * \maybe@temp@ycoordinate) --
-            (\maybe@axissign * \maybe@temp@xto, \maybe@yscale * \maybe@temp@ycoordinate);
+        \draw[maybe@tickstlye]
+            ({\maybe@xscale * (#2) + \maybe@temp@xfrom}, \maybe@yscale * \maybe@temp@ycoordinate) --
+            ({\maybe@xscale * (#2) + \maybe@temp@xto}, \maybe@yscale * \maybe@temp@ycoordinate);
     } % \foreach
 } % \maybeVTicks
 
 % Draw vertical lines.
 % Arguments:
-% -- 1 (defaults to 1pt): point radius.
+% -- 1 (defaults to argument #3): list of labels.
 % -- 2: list of x-coordinates.
 % -- 3: list of line lengths.
-% -- 4: list of labels.
-% -- 5: y-location of the axis.
+% -- 4: y-location of the axis.
 % Note: all lists should be comma-separated.
-\newcommand{\maybeVBars}[5][0pt]{%
+\newcommand{\maybeVBars}[4][@]{%
     \readlist\maybe@temp@list{#2}
     \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
@@ -487,30 +538,30 @@
         \let\maybe@temp@xcoordinate\pgfmathresult;
         \pgfmathparse{{#3}[\i]};
         \let\maybe@temp@length\pgfmathresult;
-        \pgfmathparse{{#4}[\i]};
+        \ifthenelse{\equal{#1}{@}}{}{%
+            \pgfmathparse{{#1}[\i]};}
         \let\maybe@temp@label\pgfmathresult;
-        \fill[maybe@dotstyle] (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#5 + \maybe@temp@length)}) circle (#1);
+        \fill[maybe@dotstyle] (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)}) circle (\maybe@barknobradius);
 
         \ifnum\maybe@axissign=1
-            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#5 + \maybe@temp@length)}) node[above, maybe@nodestlye] {\maybe@temp@label};
+            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)}) node[above, maybe@nodestlye] {\maybe@temp@label};
         \else
-            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#5 + \maybe@temp@length)}) node[below, maybe@nodestlye] {\maybe@temp@label};
+            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)}) node[below, maybe@nodestlye] {\maybe@temp@label};
         \fi
         \draw[maybe@barstyle]
-            (\maybe@xscale * \maybe@temp@xcoordinate, \maybe@yscale * #5) --
-            (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#5 + \maybe@temp@length)});
+            (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#4)}) --
+            (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)});
     } % \foreach
 } % \maybeVBars
 
 % Draw horizontal lines.
 % Arguments:
-% -- 1 (defaults to 1pt): point radius.
+% -- 1 (defaults to argument #3): list of labels.
 % -- 2: list of y-coordinates.
 % -- 3: list of line lengths.
-% -- 4: list of labels.
-% -- 5: x-location of the axis.
+% -- 4: x-location of the axis.
 % Note: all lists should be comma-separated.
-\newcommand{\maybeHBars}[5][0pt]{%
+\newcommand{\maybeHBars}[4][@]{%
     \readlist\maybe@temp@list{#2}
     \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
@@ -520,18 +571,19 @@
         \let\maybe@temp@ycoordinate\pgfmathresult;
         \pgfmathparse{{#3}[\i]};
         \let\maybe@temp@length\pgfmathresult;
-        \pgfmathparse{{#4}[\i]};
+        \ifthenelse{\equal{#1}{@}}{}{%
+            \pgfmathparse{{#1}[\i]};}
         \let\maybe@temp@label\pgfmathresult;
-        \fill[maybe@dotstyle] ({\maybe@xscale * (#5 + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) circle (#1);
+        \fill[maybe@dotstyle] ({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) circle (\maybe@barknobradius);
 
         \ifnum\maybe@axissign=1
-            \draw({\maybe@xscale * (#5 + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) node[right, maybe@nodestlye] {\maybe@temp@label};
+            \draw({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) node[right, maybe@nodestlye] {\maybe@temp@label};
         \else
-            \draw({\maybe@xscale * (#5 + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) node[left, maybe@nodestlye] {\maybe@temp@label};
+            \draw({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) node[left, maybe@nodestlye] {\maybe@temp@label};
         \fi
         \draw[maybe@barstyle]
-            (\maybe@xscale * #5, \maybe@yscale * \maybe@temp@ycoordinate) --
-            ({\maybe@xscale * (#5 + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate);
+            ({\maybe@xscale * (#4)}, \maybe@yscale * \maybe@temp@ycoordinate) --
+            ({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate);
     } % \foreach
 } % \maybeHBars
 
@@ -580,9 +632,9 @@
     \pgfmathsetmacro{\maybe@c}{0.5 * \maybe@a + 0.5 * \maybe@b}
     \pgfmathsetmacro{\maybe@x}{{\maybe@xscale * (#3)}}
     \pgfmathsetmacro{\maybe@height}{{abs(\maybe@b - \maybe@a)}}
-    \pgfmathsetmacro{\maybe@width}{{\maybe@xscale * (#4) / \maybe@width}}
+    \pgfmathsetmacro{\maybe@width}{{\maybe@xscale * (#4) / \maybe@height}}
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
-    \draw[maybe@barstyle] (\maybe@x + 0, \maybe@a) rectangle (\maybe@x + \maybe@height, \maybe@b);
+    \draw[maybe@barstyle] (\maybe@x + 0, \maybe@a) rectangle (\maybe@x + \maybe@width, \maybe@b);
     \ifmaybe@histabove
         \ifnum\maybe@axissign=1
             \ifthenelse{\equal{#1}{@}}{%

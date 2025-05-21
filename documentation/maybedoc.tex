@@ -1,12 +1,16 @@
 
-\documentclass{article}
+\documentclass[11pt]{article}
 \usepackage[margin=1.3in]{geometry}
 \usepackage{hyperref}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{epsdice}
+
 \usepackage{../maybe}
 
-\newcommand{\command}[1]{\texttt{\textbackslash #1}}
-\newcommand{\param}[1]{$\langle${#1}$\rangle$}
-\newcommand{\Absolute}{${}^*$}
+\newcommand{\command}[1]{\text{\textbackslash}\texttt{#1}}
+\newcommand{\param}[1]{\{\text{$\langle$}\texttt{#1}\text{$\rangle$}\}}
+\newcommand{\optparam}[1]{[\text{$\langle$}\texttt{#1}\text{$\rangle$}]}
 
 
 \begin{document}
@@ -24,15 +28,15 @@ It may be reset to the default unit scale by using the
 \]
 command (no arguments), or set to an arbitrary value by using the
 \[
-    \command{maybesetscale\{\param{xscale}\}\{\param{yscale}\}}
+    \command{maybesetscale}\param{xscale}\param{yscale}
 \]
 command.
 Setting the scale to negative value(s) achieves reflection.
 
 The current values of the scales may be retrieved through the \command{maybexscale} and \command{maybeyscale} commands that take no arguments.
 
-Certain measurements ignore internal scaling (up to the sign of the scale to respect reflection).
-They are referenced in this document as ``absolute'', and marked with \texttt{\Absolute}.
+%Certain measurements ignore internal scaling (up to the sign of the scale to respect reflection).
+%They are referenced in this document as ``absolute'', and marked with \texttt{\Absolute}.
 
 
 \section{Styling}
@@ -40,35 +44,62 @@ Each command utilizing TikZ has options for styling.
 Some are specific to a particular command, while others are universal.
 Whenever there are labels (nodes) involved, one could use
 \[
-    \command{maybesetnodestyle\{\param{style}\}}
+    \command{maybesetnodestyle}\param{style}
 \]
 to set or override the style of the node(s).
+
+
+To prevent accidents while mixing pure numbers and units in TiKZ, every option that ignores \command{maybexscale} and \command{maybeyscale} is implemented through \texttt{xshift} and \texttt{yshift}, respectively.
+
 
 \section{Axes}
 Drawing an axis may be achieved by either
 \[
-    \command{maybeHAxis[\param{label}]\{\param{xcoordinates}\}\{\param{ylocation}\}},
+    \command{maybeHAxis}\optparam{label}\param{xcoordinates}\param{ylocation},
 \]
 which produces a horizontal axis with an optional label, or
 \[
-    \command{maybeVAxis[\param{label}]\{\param{ycoordinates}\}\{\param{xlocation}\}}.
+    \command{maybeVAxis}\optparam{label}\param{ycoordinates}\param{xlocation}.
 \]
 In each case the \texttt{coordinates} have to be a comma-separated list, and the axis will run from $\min(\texttt{coordinates})$ to $\max(\texttt{coordinates})$.
-The line will be extended by the absolute amount (not affected by \command{maybexscale} or \command{maybeyscale}), which is defined in \command{maybe$@$axisextendfrom} and \command{maybe$@$axisextendto}.
+The line will be extended by the absolute amount (not affected by \command{maybexscale} or \command{maybeyscale}), which is defined by
+\[
+    \command{maybe$@$xaxisextendfrom}, \command{maybe$@$xaxisextendto}
+\]
+for the horizontal axis, and
+\[
+    \command{maybe$@$yaxisextendfrom}, \command{maybe$@$yaxisextendto}
+\]
+for the vertical axes.
 
 \begin{center}
-    \begin{tikzpicture}
-        \maybesetscale{0.5}{1}
-        \maybeHAxis[$X$]{17, 29}{0};
-    \end{tikzpicture}
-    \\
-    \begin{tikzpicture}
-        \maybesetscale{-0.5}{-1}
-        \maybeHAxis[$X$]{17, 29}{0};
-    \end{tikzpicture}
+    \begin{tabular}{@{} p{0.5\textwidth} c c @{}}
+            \vspace{-10ex}
+            \begin{minipage}{0.5\textwidth}
+                \begin{tikzpicture}
+                    \maybesetscale{0.45}{1}
+                    \maybeHAxis[$X$]{17, 29}{0};
+                \end{tikzpicture}
+                \\
+                \begin{tikzpicture}
+                    \maybesetscale{-0.45}{-1}
+                    \maybeHAxis[$X$]{17, 29}{0};
+                \end{tikzpicture}
+            \end{minipage}
+        &
+            \begin{tikzpicture}
+                \maybesetscale{1}{0.1}
+                \maybeVAxis[$Y$]{17, 29}{0};
+            \end{tikzpicture}
+        &
+            \begin{tikzpicture}
+                \maybesetscale{-1}{-0.1}
+                \maybeVAxis[$Y$]{17, 29}{0};
+            \end{tikzpicture}
+    \end{tabular}
 \end{center}
 
-The style of the axis may be changed by calling the \command{maybesetaxisstyle\{\param{style}\}} command.
+The style of the axis may be changed by calling the \command{maybesetaxisstyle} command.
 \begin{center}
     \begin{tikzpicture}
         \maybesetscale{0.5}{1}
@@ -77,110 +108,177 @@ The style of the axis may be changed by calling the \command{maybesetaxisstyle\{
     \end{tikzpicture}
 \end{center}
 
-\paragraph*{Axis labels.}
-To add labels to the horizontal or vertical axis, use the
-\[
-    \command{maybeHLabels[\param{yoffset\Absolute}]\{\param{xcoordinates}\}\{\param{xlabels}\}\{\param{ylocation}\}}
-\]
+\paragraph*{Axis labels and ticks.}
+To add labels/ticks to the horizontal or vertical axis, use the
+\begin{align*}
+    &\command{maybeHLabels}\optparam{xlabels}\param{xcoordinates}\param{ylocation} \\
+    &\command{maybeHTicks}\param{xcoordinates}\param{ylocation}
+\end{align*}
 or
-\[
-    \command{maybeVLabels[\param{xoffset\Absolute}]\{\param{ycoordinates}\}\{\param{ylabels}\}\{\param{xlocation}\}}
-\]
+\begin{align*}
+    &\command{maybeVLabels}\optparam{ylabels}\param{ycoordinates}\param{xlocation} \\
+    &\command{maybeVTicks}\param{ycoordinates}\param{xlocation}
+\end{align*}
 commands, respectively.
-Offset parameters \texttt{xoffset} and \texttt{yoffset} are absolute.
+Labels default to the coordinates specified.
+
 \begin{center}
-    \begin{tikzpicture}
-        \maybesetscale{0.5}{1}
-        \maybeHAxis[$X$]{17, 29}{0};
-        \maybeHLabels[-0.3]{20, 25}{20, 25}{0};
-    \end{tikzpicture}
-    \\
-    \begin{tikzpicture}
-        \maybesetscale{-0.5}{-1.5}
-        \maybeHAxis[$X$]{17, 29}{0};
-        \maybeHLabels[-0.3]{20, 25}{20, 25}{0};
-    \end{tikzpicture}
+    \begin{tabular}{@{} p{0.5\textwidth} c c @{}}
+            \vspace{-10ex}
+            \begin{minipage}{0.5\textwidth}
+                \begin{tikzpicture}
+                    \maybesetscale{0.45}{1}
+                    \maybeHAxis[$X$]{17, 29}{0};
+                    \maybeHLabels{20, 25}{0};
+                    \maybeHTicks{20, 25}{0};
+                \end{tikzpicture}
+                \\
+                \begin{tikzpicture}
+                    \maybesetscale{-0.45}{-1}
+                    \maybeHAxis[$X$]{17, 29}{0};
+                    \maybeHLabels{20, 25}{0};
+                    \maybeHTicks{20, 25}{0};
+                \end{tikzpicture}
+            \end{minipage}
+        &
+            \begin{tikzpicture}
+                \maybesetscale{1}{0.1}
+                \maybeVAxis[$Y$]{17, 29}{0};
+                \maybeVLabels{20, 25}{0};
+                \maybeVTicks{20, 25}{0};
+            \end{tikzpicture}
+        &
+            \begin{tikzpicture}
+                \maybesetscale{-1}{-0.1}
+                \maybeVAxis[$Y$]{17, 29}{0};
+                \maybeVLabels{20, 25}{0};
+                \maybeVTicks{20, 25}{0};
+            \end{tikzpicture} \\
+    \end{tabular}
 \end{center}
 
-\paragraph*{Axis ticks.}
-To add labels to the horizontal or vertical axis, use the
-\[
-    \command{maybeHTicks[\param{yspan\Absolute}]\{\param{xcoordinates}\}\{\param{ylocation}\}}
-\]
-or
-\[
-    \command{maybeVTicks[\param{xspan\Absolute}]\{\param{ycoordinates}\}\{\param{xlocation}\}}
-\]
-commands, respectively.
-Span parameters \texttt{xspan} and \texttt{yspan} are absolute and determine how large the ticks are going to be.
-\begin{center}
-    \begin{tikzpicture}
-        \maybesetscale{0.5}{1}
-        \maybeHAxis[$X$]{17, 29}{0};
-        \maybeHLabels[-0.3]{20, 25}{20, 25}{0};
-        \maybeHTicks[0, 0.1]{20, 25}{0};
-    \end{tikzpicture}
-    \\
-    \begin{tikzpicture}
-        \maybesetscale{-0.5}{-2.5}
-        \maybeHAxis[$X$]{17, 29}{0};
-        \maybeHLabels[-0.3]{20, 25}{20, 25}{0};
-        \maybeHTicks[0, 0.1]{20, 25}{0};
-    \end{tikzpicture}
-\end{center}
-
+\section{Visualizing Data}
 \paragraph*{Point mass functions.}
-To add vertical or horizontal bars to the graph, use the
+To add vertical or horizontal bars to a graph, use the
 \[
-    \command{maybeVBars[\param{dotradius}]\{\param{xcoordinates}\}\{\param{barlengths}\}\{\param{barlabels}\}\{\param{ylocation}\}}
+    \command{maybeVBars}\optparam{barlabels}\param{xcoordinates}\param{barlengths}\param{ylocation}
 \]
 or
 \[
-    \command{maybeHBars[\param{dotradius}]\{\param{ycoordinates}\}\{\param{barlengths}\}\{\param{barlabels}\}\{\param{xlocation}\}}
+    \command{maybeHBars}\optparam{barlabels}\param{ycoordinates}\param{barlengths}\param{xlocation}
 \]
 commands, respectively.
+Labels default to the lengths specified.
+
 \begin{center}
-    \begin{tikzpicture}
-        \maybesetscale{0.5}{1}
-        \maybeHAxis[$X$]{17, 29}{0};
-        \maybeHLabels[-0.3]{20, 25}{20, 25}{0};
-        \maybeVBars[0pt]{20, 25}{0.75, 0.25}{"3/4", "1/4"}{0};
-    \end{tikzpicture}
-    \\
-    \begin{tikzpicture}
-        \maybesetscale{-0.5}{-1}
-        \maybeHAxis[$X$]{17, 29}{0};
-        \maybeHLabels[-0.3]{20, 25}{20, 25}{0};
-        \maybeVBars[1pt]{20, 25}{0.75, 0.25}{"3/4", "1/4"}{0};
-    \end{tikzpicture}
+    \begin{tabular}{@{} p{0.5\textwidth} c c @{}}
+            \vspace{-20ex}
+            \begin{minipage}{0.5\textwidth}
+                \begin{tikzpicture}
+                    \maybesetscale{0.45}{1}
+                    \maybeHAxis[$X$]{17, 29}{0};
+                    \maybeHLabels{20, 25}{0};
+                    \maybeVBars["3/4", "1/4"]{20, 25}{0.75, 0.25}{0};
+                \end{tikzpicture}
+                \\
+                \begin{tikzpicture}
+                    \maybesetscale{-0.45}{-1}
+                    \maybeHAxis[$X$]{17, 29}{0};
+                    \maybeHLabels{20, 25}{0};
+                    \maybeHTicks{20, 25}{0};
+                    \maybeVBars["3/4", "1/4"]{20, 25}{0.75, 0.25}{0};
+                \end{tikzpicture}
+            \end{minipage}
+        &
+            \begin{tikzpicture}
+                \maybesetscale{1}{0.2}
+                \maybeVAxis[$Y$]{17, 29}{0};
+                \maybeVLabels{20, 25}{0};
+                \maybeHBars["3/4", "1/4"]{20, 25}{0.75, 0.25}{0};
+            \end{tikzpicture}
+        &
+            \begin{tikzpicture}
+                \maybesetscale{-1}{-0.2}
+                \maybeVAxis[$Y$]{17, 29}{0};
+                \maybeVLabels{20, 25}{0};
+                \maybeVTicks{20, 25}{0};
+                \maybeHBars["3/4", "1/4"]{20, 25}{0.75, 0.25}{0};
+            \end{tikzpicture} \\
+    \end{tabular}
 \end{center}
 
 \paragraph*{Histograms.}
-To add vertical or horizontal histogram rectangles to the graph, use the
+To add a vertical or horizontal histogram rectangle to a graph, use the
 \[
-    \command{maybeVHistBar[\param{label}]\{\param{xcoordinates}\}\{\param{ylocation}\}\{\param{area}\}}
+    \command{maybeVHistBar}\optparam{label}\param{xcoordinates}\param{ylocation}\param{area}
 \]
 or
 \[
-    \command{maybeHHistBar[\param{label}]\{\param{ycoordinates}\}\{\param{xlocation}\}\{\param{area}\}}
+    \command{maybeHHistBar}\optparam{label}\param{ycoordinates}\param{xlocation}\param{area}
 \]
 commands, respectively.
+Label defaults to the area specified.
+
 \begin{center}
-    \begin{tikzpicture}
-        \maybesetscale{0.5}{10.0}
-        \maybeHAxis[$X$]{17, 29}{0};
-        \maybeHLabels[-0.3]{20, 25}{20, 25}{0};
-        \maybeVHistBar{20, 25}{0}{0.25};
-    \end{tikzpicture}
-    \\
-    \begin{tikzpicture}
-        \maybesetscale{-0.5}{-10.0}
-        \maybeHAxis[$X$]{17, 29}{0};
-        \maybeHLabels[-0.3]{20, 25}{20, 25}{0};
-        \maybeVHistBar[25\%]{20, 25}{0}{0.25};
-    \end{tikzpicture}
+    \begin{tabular}{@{} p{0.5\textwidth} c c @{}}
+            \vspace{-28ex}
+            \begin{minipage}{0.5\textwidth}
+                \begin{tikzpicture}
+                    \maybesetscale{0.45}{10.0}
+                    \maybeHAxis[$X$]{17, 29}{0};
+                    \maybeHLabels{20, 25}{0};
+                    \maybeVHistBar{20, 25}{0}{0.25};
+                \end{tikzpicture}
+                \\
+                \begin{tikzpicture}
+                    \maybesetscale{-0.45}{-10.0}
+                    \maybeHAxis[$X$]{17, 29}{0};
+                    \maybeHLabels{20, 25}{0};
+                    \maybeHTicks{20, 25}{0};
+                    \maybeVHistBar{20, 25}{0}{0.25};
+                \end{tikzpicture}
+            \end{minipage}
+        &
+            \begin{tikzpicture}
+                \maybesetscale{3.0}{0.28}
+                \maybeVAxis[$Y$]{17, 29}{0};
+                \maybeVLabels{20, 25}{0};
+                \maybeHHistBar{20, 25}{0}{0.25};
+            \end{tikzpicture}
+        &
+            \begin{tikzpicture}
+                \maybesetscale{-3.0}{-0.28}
+                \maybeVAxis[$Y$]{17, 29}{0};
+                \maybeVLabels{20, 25}{0};
+                \maybeVTicks{20, 25}{0};
+                \maybeHHistBar{20, 25}{0}{0.25};
+            \end{tikzpicture} \\
+    \end{tabular}
 \end{center}
 
+
+\section{Dice}
+This package provides a TiKZ-based alternative to \texttt{epsdice}.
+
+\begin{center}
+    \newcommand{\noepsdice}{\phantom{\epsdice{1}}}
+    \newcommand{\epsdicecommand}[1]{\command{epsdice}\{\texttt{#1}\}}
+    \newcommand{\maybedicecommand}[1]{\command{maybedice}\{\texttt{#1}\}}
+    \begin{tabular}{@{} l l c @{}}
+        \toprule
+        \texttt{epsdice} command  & \texttt{maybedice} command  & output of \texttt{epsdice} / \texttt{maybedice}  \\ \midrule
+        \epsdicecommand{1}        & \maybedicecommand{1}        & \epsdice{1} / \maybedice{1} \\
+        \epsdicecommand{2}        & \maybedicecommand{2}        & \epsdice{2} / \maybedice{2} \\
+        \epsdicecommand{3}        & \maybedicecommand{3}        & \epsdice{3} / \maybedice{3} \\
+        \epsdicecommand{4}        & \maybedicecommand{4}        & \epsdice{4} / \maybedice{4} \\
+        \epsdicecommand{5}        & \maybedicecommand{5}        & \epsdice{5} / \maybedice{5} \\
+        \epsdicecommand{6}        & \maybedicecommand{6}        & \epsdice{6} / \maybedice{6} \\
+        \epsdicecommand{7}        & \maybedicecommand{7}        & \noepsdice\ / \maybedice{7} \\
+        \epsdicecommand{8}        & \maybedicecommand{8}        & \noepsdice\ / \maybedice{8} \\
+        \epsdicecommand{9}        & \maybedicecommand{9}        & \noepsdice\ / \maybedice{9} \\
+        \bottomrule
+    \end{tabular}
+\end{center}
 
 
 \end{document}
