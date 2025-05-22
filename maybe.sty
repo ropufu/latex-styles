@@ -76,6 +76,14 @@
 \newcommand{\maybesetaxisstyle}[1]{\tikzset{maybe@axisstyle/.style={#1}}}
 \newcommand{\maybesetnodestyle}[1]{\tikzset{maybe@nodestlye/.style={#1}}}
 \newcommand{\maybesettickstyle}[1]{\tikzset{maybe@tickstlye/.style={#1}}}
+\newif\ifmaybe@printbarlabels
+\newcommand{\maybeprintbarlabels}{
+    \maybe@printbarlabelstrue
+}
+\newcommand{\maybenoprintbarlabels}{
+    \maybe@printbarlabelsfalse
+}
+\maybeprintbarlabels
 
 
 \newcommand{\maybe@xscale}{1.0}
@@ -99,14 +107,16 @@
 \newcommand{\maybexscale}{\maybe@xscale}
 \newcommand{\maybeyscale}{\maybe@yscale}
 
+\newcommand{\maybe@whiskertoboxratio}{0.75}
+
+
 % ~~ QoL ~~
-% TODO: change everything to [ex] units and [xshift]/[yshift].
-\newcommand{\maybe@xaxisextendfrom}{0.3}
-\newcommand{\maybe@xaxisextendto}{0.8}
-\newcommand{\maybe@yaxisextendfrom}{0.1}
-\newcommand{\maybe@yaxisextendto}{0.3}
+\newcommand{\maybe@xaxisextendfrom}{0.5em}
+\newcommand{\maybe@xaxisextendto}{1em}
+\newcommand{\maybe@yaxisextendfrom}{0.5ex}
+\newcommand{\maybe@yaxisextendto}{1ex}
 \newcommand{\maybe@axisnodeoffset}{2.0ex}
-\newcommand{\maybe@tickoffset}{0.1}
+\newcommand{\maybe@tickoffset}{0.5ex}
 \newcommand{\maybe@barknobradius}{0pt}
 
 
@@ -391,14 +401,17 @@
 % Example: \maybeHAxis[$X$]{17, 29}{0};
 \newcommand{\maybeHAxis}[3][]{%
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
+    \pgfmathsetmacro{\maybe@temp@from}{\maybe@xscale * min(#2)}
+    \pgfmathsetmacro{\maybe@temp@to}{\maybe@xscale * max(#2)}
+    \pgfmathsetmacro{\maybe@temp@y}{\maybe@yscale * (#3)}
     \ifthenelse{\equal{\maybe@axissign}{1}}%
         {\draw[->, maybe@axisstyle]
-            ({\maybe@xscale * min(#2) - \maybe@xaxisextendfrom}, {\maybe@yscale * (#3)}) --
-            ({\maybe@xscale * max(#2) + \maybe@xaxisextendto}, {\maybe@yscale * (#3)}) node[right, maybe@nodestlye] {#1};}{}
+            ([xshift = -\maybe@xaxisextendfrom] \maybe@temp@from, \maybe@temp@y) --
+            ([xshift = \maybe@xaxisextendto] \maybe@temp@to, \maybe@temp@y) node[right, maybe@nodestlye] {#1};}{}
     \ifthenelse{\equal{\maybe@axissign}{-1}}%
         {\draw[->, maybe@axisstyle]
-            ({\maybe@xscale * min(#2) + \maybe@xaxisextendfrom}, {\maybe@yscale * (#3)}) --
-            ({\maybe@xscale * max(#2) - \maybe@xaxisextendto}, {\maybe@yscale * (#3)}) node[left, maybe@nodestlye] {#1};}{}
+            ([xshift = \maybe@xaxisextendfrom] \maybe@temp@from, \maybe@temp@y) --
+            ([xshift = -\maybe@xaxisextendto] \maybe@temp@to, \maybe@temp@y) node[left, maybe@nodestlye] {#1};}{}
 } % \maybeHAxis
 
 % Draw a horizontal axis pointing to the right if \maybexscale > 0 and left if \maybexscale < 0.
@@ -410,13 +423,17 @@
 % Example: \maybeVAxis[$Y$]{17, 29}{0};
 \newcommand{\maybeVAxis}[3][]{%
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
+    \pgfmathsetmacro{\maybe@temp@from}{\maybe@yscale * min(#2)}
+    \pgfmathsetmacro{\maybe@temp@to}{\maybe@yscale * max(#2)}
+    \pgfmathsetmacro{\maybe@temp@x}{\maybe@xscale * (#3)}
     \ifthenelse{\equal{\maybe@axissign}{1}}%
         {\draw[->, maybe@axisstyle]
-            ({\maybe@xscale * (#3)}, {\maybe@yscale * min(#2) - \maybe@yaxisextendfrom}) --
-            ({\maybe@xscale * (#3)}, {\maybe@yscale * max(#2) + \maybe@yaxisextendto}) node[above, maybe@nodestlye] {#1};}
+            ([yshift = -\maybe@yaxisextendfrom] \maybe@temp@x, \maybe@temp@from) --
+            ([yshift = \maybe@yaxisextendto] \maybe@temp@x, \maybe@temp@to) node[above, maybe@nodestlye] {#1};}{}
+    \ifthenelse{\equal{\maybe@axissign}{-1}}%
         {\draw[->, maybe@axisstyle]
-            ({\maybe@xscale * (#3)}, {\maybe@yscale * min(#2) + \maybe@yaxisextendfrom}) --
-            ({\maybe@xscale * (#3)}, {\maybe@yscale * max(#2) - \maybe@yaxisextendto}) node[below, maybe@nodestlye] {#1};}
+            ([yshift = \maybe@yaxisextendfrom] \maybe@temp@x, \maybe@temp@from) --
+            ([yshift = -\maybe@yaxisextendto] \maybe@temp@x, \maybe@temp@to) node[below, maybe@nodestlye] {#1};}{}
 } % \maybeVAxis
 
 % Draw a horizontal sequence of labels.
@@ -471,6 +488,7 @@
 \newcommand{\maybeHTicks}[2]{%
     \readlist\maybe@temp@list{#1}
     \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
+    \pgfmathsetmacro{\maybe@temp@y}{\maybe@yscale * (#2)}
     \ifmaybe@ticksabove
         \pgfmathsetmacro{\maybe@temp@yfrom}{0}
         \pgfmathsetmacro{\maybe@temp@yto}{sign(\maybe@yscale) * \maybe@tickoffset}
@@ -488,8 +506,8 @@
         \pgfmathparse{{#1}[\i]};
         \let\maybe@temp@xcoordinate\pgfmathresult;
         \draw[maybe@tickstlye]
-            (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#2) + \maybe@temp@yfrom}) --
-            (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#2) + \maybe@temp@yto});
+            ([yshift = \maybe@temp@yfrom] \maybe@xscale * \maybe@temp@xcoordinate, \maybe@temp@y) --
+            ([yshift = \maybe@temp@yto] \maybe@xscale * \maybe@temp@xcoordinate, \maybe@temp@y);
     } % \foreach
 } % \maybeHTicks
 
@@ -499,6 +517,7 @@
 \newcommand{\maybeVTicks}[2]{%
     \readlist\maybe@temp@list{#1}
     \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
+    \pgfmathsetmacro{\maybe@temp@x}{\maybe@xscale * (#2)}
     \ifmaybe@ticksabove
         \pgfmathsetmacro{\maybe@temp@xfrom}{0}
         \pgfmathsetmacro{\maybe@temp@xto}{sign(\maybe@xscale) * \maybe@tickoffset}
@@ -516,8 +535,8 @@
         \pgfmathparse{{#1}[\i]};
         \let\maybe@temp@ycoordinate\pgfmathresult;
         \draw[maybe@tickstlye]
-            ({\maybe@xscale * (#2) + \maybe@temp@xfrom}, \maybe@yscale * \maybe@temp@ycoordinate) --
-            ({\maybe@xscale * (#2) + \maybe@temp@xto}, \maybe@yscale * \maybe@temp@ycoordinate);
+            ([xshift = \maybe@temp@xfrom] \maybe@temp@x, \maybe@yscale * \maybe@temp@ycoordinate) --
+            ([xshift = \maybe@temp@xto] \maybe@temp@x, \maybe@yscale * \maybe@temp@ycoordinate);
     } % \foreach
 } % \maybeVTicks
 
@@ -543,10 +562,14 @@
         \let\maybe@temp@label\pgfmathresult;
         \fill[maybe@dotstyle] (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)}) circle (\maybe@barknobradius);
 
-        \ifnum\maybe@axissign=1
-            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)}) node[above, maybe@nodestlye] {\maybe@temp@label};
+        \ifmaybe@printbarlabels
+            \ifnum\maybe@axissign=1
+                \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)}) node[above, maybe@nodestlye] {\maybe@temp@label};
+            \else
+                \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)}) node[below, maybe@nodestlye] {\maybe@temp@label};
+            \fi
         \else
-            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)}) node[below, maybe@nodestlye] {\maybe@temp@label};
+            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)});
         \fi
         \draw[maybe@barstyle]
             (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#4)}) --
@@ -576,10 +599,14 @@
         \let\maybe@temp@label\pgfmathresult;
         \fill[maybe@dotstyle] ({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) circle (\maybe@barknobradius);
 
-        \ifnum\maybe@axissign=1
-            \draw({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) node[right, maybe@nodestlye] {\maybe@temp@label};
+        \ifmaybe@printbarlabels
+            \ifnum\maybe@axissign=1
+                \draw({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) node[right, maybe@nodestlye] {\maybe@temp@label};
+            \else
+                \draw({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) node[left, maybe@nodestlye] {\maybe@temp@label};
+            \fi
         \else
-            \draw({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) node[left, maybe@nodestlye] {\maybe@temp@label};
+            \draw({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate);
         \fi
         \draw[maybe@barstyle]
             ({\maybe@xscale * (#4)}, \maybe@yscale * \maybe@temp@ycoordinate) --
@@ -602,21 +629,23 @@
     \pgfmathsetmacro{\maybe@height}{{\maybe@yscale * (#4) / \maybe@width}}
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
     \draw[maybe@barstyle] (\maybe@a, \maybe@y + 0) rectangle (\maybe@b, \maybe@y + \maybe@height);
-    \ifmaybe@histabove
-        \ifnum\maybe@axissign=1
-            \ifthenelse{\equal{#1}{@}}{%
-                \draw (\maybe@c, \maybe@y + \maybe@height) node[above, maybe@nodestlye] {#4};}{%
-                \draw (\maybe@c, \maybe@y + \maybe@height) node[above, maybe@nodestlye] {#1};}
-        \else
-            \ifthenelse{\equal{#1}{@}}{%
-                \draw (\maybe@c, \maybe@y + \maybe@height) node[below, maybe@nodestlye] {#4};}{%
-                \draw (\maybe@c, \maybe@y + \maybe@height) node[below, maybe@nodestlye] {#1};}
+    \ifmaybe@printbarlabels
+        \ifmaybe@histabove
+            \ifnum\maybe@axissign=1
+                \ifthenelse{\equal{#1}{@}}{%
+                    \draw (\maybe@c, \maybe@y + \maybe@height) node[above, maybe@nodestlye] {#4};}{%
+                    \draw (\maybe@c, \maybe@y + \maybe@height) node[above, maybe@nodestlye] {#1};}
+            \else
+                \ifthenelse{\equal{#1}{@}}{%
+                    \draw (\maybe@c, \maybe@y + \maybe@height) node[below, maybe@nodestlye] {#4};}{%
+                    \draw (\maybe@c, \maybe@y + \maybe@height) node[below, maybe@nodestlye] {#1};}
+            \fi
         \fi
-    \fi
-    \ifmaybe@histcenter
-        \ifthenelse{\equal{#1}{@}}{%
-            \draw (\maybe@c, \maybe@y + 0.5 * \maybe@height) node[maybe@nodestlye] {#4};}{%
-            \draw (\maybe@c, \maybe@y + 0.5 * \maybe@height) node[maybe@nodestlye] {#1};}
+        \ifmaybe@histcenter
+            \ifthenelse{\equal{#1}{@}}{%
+                \draw (\maybe@c, \maybe@y + 0.5 * \maybe@height) node[maybe@nodestlye] {#4};}{%
+                \draw (\maybe@c, \maybe@y + 0.5 * \maybe@height) node[maybe@nodestlye] {#1};}
+        \fi
     \fi
 } % \maybeVHistBar
 
@@ -635,48 +664,77 @@
     \pgfmathsetmacro{\maybe@width}{{\maybe@xscale * (#4) / \maybe@height}}
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
     \draw[maybe@barstyle] (\maybe@x + 0, \maybe@a) rectangle (\maybe@x + \maybe@width, \maybe@b);
-    \ifmaybe@histabove
-        \ifnum\maybe@axissign=1
-            \ifthenelse{\equal{#1}{@}}{%
-                \draw (\maybe@x + \maybe@width, \maybe@c) node[right, maybe@nodestlye] {#4};}{%
-                \draw (\maybe@x + \maybe@width, \maybe@c) node[right, maybe@nodestlye] {#1};}
-        \else
-            \ifthenelse{\equal{#1}{@}}{%
-                \draw (\maybe@x + \maybe@width, \maybe@c) node[left, maybe@nodestlye] {#4};}{%
-                \draw (\maybe@x + \maybe@width, \maybe@c) node[left, maybe@nodestlye] {#1};}
+    \ifmaybe@printbarlabels
+        \ifmaybe@histabove
+            \ifnum\maybe@axissign=1
+                \ifthenelse{\equal{#1}{@}}{%
+                    \draw (\maybe@x + \maybe@width, \maybe@c) node[right, maybe@nodestlye] {#4};}{%
+                    \draw (\maybe@x + \maybe@width, \maybe@c) node[right, maybe@nodestlye] {#1};}
+            \else
+                \ifthenelse{\equal{#1}{@}}{%
+                    \draw (\maybe@x + \maybe@width, \maybe@c) node[left, maybe@nodestlye] {#4};}{%
+                    \draw (\maybe@x + \maybe@width, \maybe@c) node[left, maybe@nodestlye] {#1};}
+            \fi
         \fi
-    \fi
-    \ifmaybe@histcenter
-        \ifthenelse{\equal{#1}{@}}{%
-            \draw (\maybe@x + 0.5 * \maybe@width, \maybe@c) node[maybe@nodestlye] {#4};}{%
-            \draw (\maybe@x + 0.5 * \maybe@width, \maybe@c) node[maybe@nodestlye] {#1};}
+        \ifmaybe@histcenter
+            \ifthenelse{\equal{#1}{@}}{%
+                \draw (\maybe@x + 0.5 * \maybe@width, \maybe@c) node[maybe@nodestlye] {#4};}{%
+                \draw (\maybe@x + 0.5 * \maybe@width, \maybe@c) node[maybe@nodestlye] {#1};}
+        \fi
     \fi
 } % \maybeHHistBar
 
-% Draw a box plot.
+% Draw a horizontal box-plot.
 % Arguments:
 % -- 1: comma-separated list (left whisker, Q1, Q2, Q3, right whisker).
-% -- 2: height of the box.
-% -- 3: height of the whisker.
-% -- 4: y-coordinate.
-% Required variables:
-% -- \xscale: multiplier for x-coordinates.
-% -- \yscale: multiplier for y-coordinates.
-\newcommand{\maybeBoxPlot}[4]{%
-    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\tempMaybeLeft}{\pgfmathresult};
-    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\tempMaybeFirst}{\pgfmathresult};
-    \pgfmathparse{{#1}[2]}; \pgfmathsetmacro{\tempMaybeSecond}{\pgfmathresult};
-    \pgfmathparse{{#1}[3]}; \pgfmathsetmacro{\tempMaybeThird}{\pgfmathresult};
-    \pgfmathparse{{#1}[4]}; \pgfmathsetmacro{\tempMaybeRight}{\pgfmathresult};
-    \pgfmathsetmacro{\tempMaybeBoxWidth}{{\tempMaybeThird - \tempMaybeFirst}}
-    % ~~ And now for the box plot ~~
-    \draw[maybe@boxstyle] (\maybe@xscale * \tempMaybeFirst, {\yscale*(#4 - 0.5*#2)}) rectangle (\maybe@xscale * \tempMaybeThird, {\yscale*(#4 + 0.5*#2)}); % The box itself.
-    \draw[maybe@medianstyle] (\maybe@xscale * \tempMaybeSecond, {\yscale*(#4 - 0.5*#2)}) -- (\maybe@xscale * \tempMaybeSecond, {\yscale*(#4 + 0.5*#2)});   % Median marker.
-    \draw[maybe@whisklinestyle] (\maybe@xscale * \tempMaybeLeft, \yscale*#4) -- (\maybe@xscale * \tempMaybeFirst, \yscale*#4);  % Box to left whisker connector.
-    \draw[maybe@whisklinestyle] (\maybe@xscale * \tempMaybeThird, \yscale*#4) -- (\maybe@xscale * \tempMaybeRight, \yscale*#4); % Box to right whisker connector.
-    \draw[maybe@whiskerstyle] (\maybe@xscale * \tempMaybeLeft, {\yscale*(#4 - 0.5*#3)}) -- (\maybe@xscale * \tempMaybeLeft, {\yscale*(#4 + 0.5*#3)});        % Left whisker.
-    \draw[maybe@whiskerstyle] (\maybe@xscale * \tempMaybeRight, {\yscale*(#4 - 0.5*#3)}) -- (\maybe@xscale * \tempMaybeRight, {\yscale*(#4 + 0.5*#3)});      % Right whisker.
-} % \newcommand
+% -- 2: y-coordinate.
+% -- 3: height of the box.
+\newcommand{\maybeHBoxPlot}[3]{%
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@temp@a}{\maybe@xscale * \pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@temp@b}{\maybe@xscale * \pgfmathresult};
+    \pgfmathparse{{#1}[2]}; \pgfmathsetmacro{\maybe@temp@c}{\maybe@xscale * \pgfmathresult};
+    \pgfmathparse{{#1}[3]}; \pgfmathsetmacro{\maybe@temp@d}{\maybe@xscale * \pgfmathresult};
+    \pgfmathparse{{#1}[4]}; \pgfmathsetmacro{\maybe@temp@e}{\maybe@xscale * \pgfmathresult};
+    \pgfmathsetmacro{\maybe@temp@y}{\maybe@yscale * (#2)}
+    \pgfmathsetmacro{\maybe@temp@boxfrom}{\maybe@temp@y - \maybe@yscale * 0.5 * (#3)}
+    \pgfmathsetmacro{\maybe@temp@boxto}{\maybe@temp@y + \maybe@yscale * 0.5 * (#3)}
+    \pgfmathsetmacro{\maybe@temp@whiskerfrom}{\maybe@temp@y - \maybe@yscale * 0.5 * \maybe@whiskertoboxratio * (#3)}
+    \pgfmathsetmacro{\maybe@temp@whiskerto}{\maybe@temp@y + \maybe@yscale * 0.5 * \maybe@whiskertoboxratio * (#3)}
+    % ~~ Box ~~
+    \draw[maybe@boxstyle] (\maybe@temp@b, \maybe@temp@boxfrom) rectangle (\maybe@temp@d, \maybe@temp@boxto);
+    \draw[maybe@medianstyle] (\maybe@temp@c, \maybe@temp@boxfrom) -- (\maybe@temp@c, \maybe@temp@boxto);
+    % ~~ Whiskers ~~
+    \draw[maybe@whisklinestyle] (\maybe@temp@a, \maybe@temp@y) -- (\maybe@temp@b, \maybe@temp@y);
+    \draw[maybe@whisklinestyle] (\maybe@temp@d, \maybe@temp@y) -- (\maybe@temp@e, \maybe@temp@y);
+    \draw[maybe@whiskerstyle] (\maybe@temp@a, \maybe@temp@whiskerfrom) -- (\maybe@temp@a, \maybe@temp@whiskerto);
+    \draw[maybe@whiskerstyle] (\maybe@temp@e, \maybe@temp@whiskerfrom) -- (\maybe@temp@e, \maybe@temp@whiskerto);
+} % \maybeHBoxPlot
+
+% Draw a vertical box-plot.
+% Arguments:
+% -- 1: comma-separated list (bottom whisker, Q1, Q2, Q3, top whisker).
+% -- 2: x-coordinate.
+% -- 3: width of the box.
+\newcommand{\maybeVBoxPlot}[3]{%
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@temp@a}{\maybe@yscale * \pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@temp@b}{\maybe@yscale * \pgfmathresult};
+    \pgfmathparse{{#1}[2]}; \pgfmathsetmacro{\maybe@temp@c}{\maybe@yscale * \pgfmathresult};
+    \pgfmathparse{{#1}[3]}; \pgfmathsetmacro{\maybe@temp@d}{\maybe@yscale * \pgfmathresult};
+    \pgfmathparse{{#1}[4]}; \pgfmathsetmacro{\maybe@temp@e}{\maybe@yscale * \pgfmathresult};
+    \pgfmathsetmacro{\maybe@temp@x}{\maybe@xscale * (#2)}
+    \pgfmathsetmacro{\maybe@temp@boxfrom}{\maybe@temp@x - \maybe@xscale * 0.5 * (#3)}
+    \pgfmathsetmacro{\maybe@temp@boxto}{\maybe@temp@x + \maybe@xscale * 0.5 * (#3)}
+    \pgfmathsetmacro{\maybe@temp@whiskerfrom}{\maybe@temp@x - \maybe@xscale * 0.5 * \maybe@whiskertoboxratio * (#3)}
+    \pgfmathsetmacro{\maybe@temp@whiskerto}{\maybe@temp@x + \maybe@xscale * 0.5 * \maybe@whiskertoboxratio * (#3)}
+    % ~~ Box ~~
+    \draw[maybe@boxstyle] (\maybe@temp@boxfrom, \maybe@temp@b) rectangle (\maybe@temp@boxto, \maybe@temp@d);
+    \draw[maybe@medianstyle] (\maybe@temp@boxfrom, \maybe@temp@c) -- (\maybe@temp@boxto, \maybe@temp@c);
+    % ~~ Whiskers ~~
+    \draw[maybe@whisklinestyle] (\maybe@temp@x, \maybe@temp@a) -- (\maybe@temp@x, \maybe@temp@b);
+    \draw[maybe@whisklinestyle] (\maybe@temp@x, \maybe@temp@d) -- (\maybe@temp@x, \maybe@temp@e);
+    \draw[maybe@whiskerstyle] (\maybe@temp@whiskerfrom, \maybe@temp@a) -- (\maybe@temp@whiskerto, \maybe@temp@a);
+    \draw[maybe@whiskerstyle] (\maybe@temp@whiskerfrom, \maybe@temp@e) -- (\maybe@temp@whiskerto, \maybe@temp@e);
+} % \maybeVBoxPlot
 
 % ~~ Six-sided dice unwrapped ~~
 \newcommand{\flatDSix}[6]{
@@ -753,92 +811,183 @@
 }
 
 \newcommand{\maybedice}[1]{%
-\begin{tikzpicture}[baseline = {([yshift = -0.7ex] current bounding box.center)}]
-    \pgfmathsetmacro{\maybe@good}{0}
-    \pgfmathsetmacro{\g}{\maybe@dicegrid}
-    \pgfmathsetmacro{\r}{3 * \maybe@diceonethirdradius}
-    \draw[rounded corners = 30 * \maybe@dicecornerfactor * \maybe@dicegrid] (-\r, -\r) rectangle (\r, \r);
-    % ~~ One dots ~~
-    \ifthenelse{\equal{#1}{1}}{%
-        \pgfmathsetmacro{\maybe@good}{1}
-        \maybe@dicedrawdotat{0}{0};
-    }{}
-    % ~~ Two dots ~~
-    \ifthenelse{\equal{#1}{2}}{%
-        \pgfmathsetmacro{\maybe@good}{1}
-        \maybe@dicedrawdotat{-2}{-2};
-        \maybe@dicedrawdotat{2}{2};
-    }{}
-    % ~~ Three dots ~~
-    \ifthenelse{\equal{#1}{3}}{%
-        \pgfmathsetmacro{\maybe@good}{1}
-        \maybe@dicedrawdotat{-2}{-2};
-        \maybe@dicedrawdotat{0}{0};
-        \maybe@dicedrawdotat{2}{2};
-    }{}
-    % ~~ Four dots ~~
-    \ifthenelse{\equal{#1}{4}}{%
-        \pgfmathsetmacro{\maybe@good}{1}
-        \maybe@dicedrawdotat{-2}{-2};
-        \maybe@dicedrawdotat{-2}{2};
-        \maybe@dicedrawdotat{2}{-2};
-        \maybe@dicedrawdotat{2}{2};
-    }{}
-    % ~~ Five dots ~~
-    \ifthenelse{\equal{#1}{5}}{%
-        \pgfmathsetmacro{\maybe@good}{1}
-        \maybe@dicedrawdotat{-2}{-2};
-        \maybe@dicedrawdotat{-2}{2};
-        \maybe@dicedrawdotat{0}{0};
-        \maybe@dicedrawdotat{2}{-2};
-        \maybe@dicedrawdotat{2}{2};
-    }{}
-    % ~~ Six dots ~~
-    \ifthenelse{\equal{#1}{6}}{%
-        \pgfmathsetmacro{\maybe@good}{1}
-        \maybe@dicedrawdotat{-2}{-2};
-        \maybe@dicedrawdotat{-2}{0};
-        \maybe@dicedrawdotat{-2}{2};
-        \maybe@dicedrawdotat{2}{-2};
-        \maybe@dicedrawdotat{2}{0};
-        \maybe@dicedrawdotat{2}{2};
-    }{}
-    % ~~ Seven dots ~~
-    \ifthenelse{\equal{#1}{7}}{%
-        \pgfmathsetmacro{\maybe@good}{1}
-        \maybe@dicedrawdotat{-2}{-2};
-        \maybe@dicedrawdotat{-2}{0};
-        \maybe@dicedrawdotat{-2}{2};
-        \maybe@dicedrawdotat{0}{0};
-        \maybe@dicedrawdotat{2}{-2};
-        \maybe@dicedrawdotat{2}{0};
-        \maybe@dicedrawdotat{2}{2};
-    }{}
-    % ~~ Eight dots ~~
-    \ifthenelse{\equal{#1}{8}}{%
-        \pgfmathsetmacro{\maybe@good}{1}
-        \maybe@dicedrawdotat{-2}{-2};
-        \maybe@dicedrawdotat{-2}{0};
-        \maybe@dicedrawdotat{-2}{2};
-        \maybe@dicedrawdotat{0}{-2};
-        \maybe@dicedrawdotat{0}{2};
-        \maybe@dicedrawdotat{2}{-2};
-        \maybe@dicedrawdotat{2}{0};
-        \maybe@dicedrawdotat{2}{2};
-    }{}
-    % ~~ Nine dots ~~
-    \ifthenelse{\equal{#1}{9}}{%
-        \pgfmathsetmacro{\maybe@good}{1}
-        \maybe@dicedrawdotat{-2}{-2};
-        \maybe@dicedrawdotat{-2}{0};
-        \maybe@dicedrawdotat{-2}{2};
-        \maybe@dicedrawdotat{0}{-2};
-        \maybe@dicedrawdotat{0}{0};
-        \maybe@dicedrawdotat{0}{2};
-        \maybe@dicedrawdotat{2}{-2};
-        \maybe@dicedrawdotat{2}{0};
-        \maybe@dicedrawdotat{2}{2};
-    }{}
-    \ifthenelse{\equal{\maybe@good}{1}}{}{\PackageError{maybe}{Die value of #1 not recognized.}{\protect\maybedice\space only supports values 1--9.}}
-\end{tikzpicture}
-}
+    \begin{tikzpicture}[baseline = {([yshift = -0.7ex] current bounding box.center)}]
+        \pgfmathsetmacro{\maybe@good}{0}
+        \pgfmathsetmacro{\g}{\maybe@dicegrid}
+        \pgfmathsetmacro{\r}{3 * \maybe@diceonethirdradius}
+        \draw[rounded corners = 30 * \maybe@dicecornerfactor * \maybe@dicegrid] (-\r, -\r) rectangle (\r, \r);
+        % ~~ One dots ~~
+        \ifthenelse{\equal{#1}{1}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{0}{0};
+        }{}
+        % ~~ Two dots ~~
+        \ifthenelse{\equal{#1}{2}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{-2};
+            \maybe@dicedrawdotat{2}{2};
+        }{}
+        % ~~ Three dots ~~
+        \ifthenelse{\equal{#1}{3}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{-2};
+            \maybe@dicedrawdotat{0}{0};
+            \maybe@dicedrawdotat{2}{2};
+        }{}
+        % ~~ Four dots ~~
+        \ifthenelse{\equal{#1}{4}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{-2};
+            \maybe@dicedrawdotat{-2}{2};
+            \maybe@dicedrawdotat{2}{-2};
+            \maybe@dicedrawdotat{2}{2};
+        }{}
+        % ~~ Five dots ~~
+        \ifthenelse{\equal{#1}{5}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{-2};
+            \maybe@dicedrawdotat{-2}{2};
+            \maybe@dicedrawdotat{0}{0};
+            \maybe@dicedrawdotat{2}{-2};
+            \maybe@dicedrawdotat{2}{2};
+        }{}
+        % ~~ Six dots ~~
+        \ifthenelse{\equal{#1}{6}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{-2};
+            \maybe@dicedrawdotat{-2}{0};
+            \maybe@dicedrawdotat{-2}{2};
+            \maybe@dicedrawdotat{2}{-2};
+            \maybe@dicedrawdotat{2}{0};
+            \maybe@dicedrawdotat{2}{2};
+        }{}
+        % ~~ Seven dots ~~
+        \ifthenelse{\equal{#1}{7}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{-2};
+            \maybe@dicedrawdotat{-2}{0};
+            \maybe@dicedrawdotat{-2}{2};
+            \maybe@dicedrawdotat{0}{0};
+            \maybe@dicedrawdotat{2}{-2};
+            \maybe@dicedrawdotat{2}{0};
+            \maybe@dicedrawdotat{2}{2};
+        }{}
+        % ~~ Eight dots ~~
+        \ifthenelse{\equal{#1}{8}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{-2};
+            \maybe@dicedrawdotat{-2}{0};
+            \maybe@dicedrawdotat{-2}{2};
+            \maybe@dicedrawdotat{0}{-2};
+            \maybe@dicedrawdotat{0}{2};
+            \maybe@dicedrawdotat{2}{-2};
+            \maybe@dicedrawdotat{2}{0};
+            \maybe@dicedrawdotat{2}{2};
+        }{}
+        % ~~ Nine dots ~~
+        \ifthenelse{\equal{#1}{9}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{-2};
+            \maybe@dicedrawdotat{-2}{0};
+            \maybe@dicedrawdotat{-2}{2};
+            \maybe@dicedrawdotat{0}{-2};
+            \maybe@dicedrawdotat{0}{0};
+            \maybe@dicedrawdotat{0}{2};
+            \maybe@dicedrawdotat{2}{-2};
+            \maybe@dicedrawdotat{2}{0};
+            \maybe@dicedrawdotat{2}{2};
+        }{}
+        \ifthenelse{\equal{\maybe@good}{1}}{}{\PackageError{maybe}{Die value of #1 not recognized.}{\protect\maybedice\space only supports values 1--9.}}
+    \end{tikzpicture}
+} % \maybedice
+
+\newcommand{\maybevardice}[1]{%
+    \begin{tikzpicture}[baseline = {([yshift = -0.7ex] current bounding box.center)}]
+        \pgfmathsetmacro{\maybe@good}{0}
+        \pgfmathsetmacro{\g}{\maybe@dicegrid}
+        \pgfmathsetmacro{\r}{3 * \maybe@diceonethirdradius}
+        \draw[rounded corners = 30 * \maybe@dicecornerfactor * \maybe@dicegrid] (-\r, -\r) rectangle (\r, \r);
+        % ~~ One dots ~~
+        \ifthenelse{\equal{#1}{1}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{0}{0};
+        }{}
+        % ~~ Two dots ~~
+        \ifthenelse{\equal{#1}{2}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{2};
+            \maybe@dicedrawdotat{2}{-2};
+        }{}
+        % ~~ Three dots ~~
+        \ifthenelse{\equal{#1}{3}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{2};
+            \maybe@dicedrawdotat{0}{0};
+            \maybe@dicedrawdotat{2}{-2};
+        }{}
+        % ~~ Four dots ~~
+        \ifthenelse{\equal{#1}{4}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{0};
+            \maybe@dicedrawdotat{0}{-2};
+            \maybe@dicedrawdotat{0}{2};
+            \maybe@dicedrawdotat{2}{0};
+        }{}
+        % ~~ Five dots ~~
+        \ifthenelse{\equal{#1}{5}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{0};
+            \maybe@dicedrawdotat{0}{-2};
+            \maybe@dicedrawdotat{0}{0};
+            \maybe@dicedrawdotat{0}{2};
+            \maybe@dicedrawdotat{2}{0};
+        }{}
+        % ~~ Six dots ~~
+        \ifthenelse{\equal{#1}{6}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{-2};
+            \maybe@dicedrawdotat{-2}{2};
+            \maybe@dicedrawdotat{0}{-2};
+            \maybe@dicedrawdotat{0}{2};
+            \maybe@dicedrawdotat{2}{-2};
+            \maybe@dicedrawdotat{2}{2};
+        }{}
+        % ~~ Seven dots ~~
+        \ifthenelse{\equal{#1}{7}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{-2};
+            \maybe@dicedrawdotat{-2}{2};
+            \maybe@dicedrawdotat{0}{-2};
+            \maybe@dicedrawdotat{0}{0};
+            \maybe@dicedrawdotat{0}{2};
+            \maybe@dicedrawdotat{2}{-2};
+            \maybe@dicedrawdotat{2}{2};
+        }{}
+        % ~~ Eight dots ~~
+        \ifthenelse{\equal{#1}{8}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{-2};
+            \maybe@dicedrawdotat{-2}{0};
+            \maybe@dicedrawdotat{-2}{2};
+            \maybe@dicedrawdotat{0}{-2};
+            \maybe@dicedrawdotat{0}{2};
+            \maybe@dicedrawdotat{2}{-2};
+            \maybe@dicedrawdotat{2}{0};
+            \maybe@dicedrawdotat{2}{2};
+        }{}
+        % ~~ Nine dots ~~
+        \ifthenelse{\equal{#1}{9}}{%
+            \pgfmathsetmacro{\maybe@good}{1}
+            \maybe@dicedrawdotat{-2}{-2};
+            \maybe@dicedrawdotat{-2}{0};
+            \maybe@dicedrawdotat{-2}{2};
+            \maybe@dicedrawdotat{0}{-2};
+            \maybe@dicedrawdotat{0}{0};
+            \maybe@dicedrawdotat{0}{2};
+            \maybe@dicedrawdotat{2}{-2};
+            \maybe@dicedrawdotat{2}{0};
+            \maybe@dicedrawdotat{2}{2};
+        }{}
+        \ifthenelse{\equal{\maybe@good}{1}}{}{\PackageError{maybe}{Die value of #1 not recognized.}{\protect\maybedice\space only supports values 1--9.}}
+    \end{tikzpicture}
+} % \maybevardice
