@@ -76,11 +76,11 @@
 }
 
 \newcommand{\maybedice@drawdots}[2]{
-    \readlist\maybe@list{#1}
+    \readlist\maybedice@list{#1}
     
-    \maybedice@drawdotrow{\maybe@list[1]}{2}{#2};
-    \maybedice@drawdotrow{\maybe@list[2]}{0}{#2};
-    \maybedice@drawdotrow{\maybe@list[3]}{-2}{#2};
+    \maybedice@drawdotrow{\maybedice@list[1]}{2}{#2};
+    \maybedice@drawdotrow{\maybedice@list[2]}{0}{#2};
+    \maybedice@drawdotrow{\maybedice@list[3]}{-2}{#2};
 }
 
 \newcommand{\maybemaskdice}[2][1.0]{%
@@ -117,7 +117,7 @@
         \maybedice@ifdots{#2}{8}{111, 101, 111}{#1};
         \maybedice@ifdots{#2}{9}{111, 111, 111}{#1};
         % ~~ Fallback ~~
-        \ifthenelse{\equal{\maybe@good}{1}}{}{\PackageError{maybe}{Die value of #2 not supported}{\protect\maybedice\space only supports values 1--9.}}
+        \ifthenelse{\equal{\maybe@good}{1}}{}{\PackageError{maybedice}{Die value of #2 not supported}{\protect\maybedice\space only supports values 1--9.}}
     \end{tikzpicture}
 } % \maybedice
 
@@ -138,7 +138,7 @@
         \maybedice@ifdots{#2}{8}{111, 101, 111}{#1};
         \maybedice@ifdots{#2}{9}{111, 111, 111}{#1};
         % ~~ Fallback ~~
-        \ifthenelse{\equal{\maybe@good}{1}}{}{\PackageError{maybe}{Die value of #2 not supported}{\protect\maybevardice\space only supports values 1--9.}}
+        \ifthenelse{\equal{\maybe@good}{1}}{}{\PackageError{maybedice}{Die value of #2 not supported}{\protect\maybevardice\space only supports values 1--9.}}
     \end{tikzpicture}
 } % \maybevardice
 
@@ -156,7 +156,6 @@
     \begin{tikzpicture}[baseline = {([yshift = -0.7ex] current bounding box.center)}]
         \pgfmathparse{dim({#1})};
         \let\maybe@sides\pgfmathresult;
-        \pgfmathsetmacro{\maybe@good}{0}
         \pgfmathsetmacro{\r}{3 * \maybedice@onethirdradius}
         % ~~ d6 ~~
         \ifthenelse{\equal{\maybe@sides}{6}}{%
@@ -173,14 +172,14 @@
             \pgfmathparse{{#1}[4]};
             \let\maybe@label\pgfmathresult;
             \draw (0, 2 * \r) node[maybedice@nodestlye] {\tiny\maybe@label};
-
+            
             \pgfmathparse{{#1}[5]};
             \let\maybe@label\pgfmathresult;
             \draw (0, -2 * \r) node[maybedice@nodestlye] {\tiny\maybe@label};
         }{}
-        \ifthenelse{\equal{\maybe@good}{1}}{}{\PackageError{maybe}{Dice with \maybe@sides\space sides not supported}{\protect\maybeorigamidice\space only supports d6.}}
+        \ifthenelse{\equal{\maybe@good}{1}}{}{\PackageError{maybedice}{Dice with \maybe@sides\space sides not supported}{\protect\maybetinyorigamidice\space only supports d6.}}
     \end{tikzpicture}
-} % \maybe@tinyorigamidice
+} % \maybetinyorigamidice
 
 \newcommand{\maybetinyorigamidiestd}{\maybetinyorigamidice{2, 3, 5, 4, 6, 1}}
 
@@ -210,9 +209,9 @@
             \let\maybe@label\pgfmathresult;
             \draw (0, -2 * \r) node[maybedice@nodestlye] {\maybe@label};
         }{}
-        \ifthenelse{\equal{\maybe@good}{1}}{}{\PackageError{maybe}{Dice with \maybe@sides\space sides not supported}{\protect\maybeorigamidice\space only supports d6.}}
+        \ifthenelse{\equal{\maybe@good}{1}}{}{\PackageError{maybedice}{Dice with \maybe@sides\space sides not supported}{\protect\maybeorigamidice\space only supports d6.}}
     \end{tikzpicture}
-}
+} % \maybeorigamidice
 
 \newcommand{\maybeorigamidiestd}{\maybeorigamidice{2, 3, 5, 4, 6, 1}}
 
