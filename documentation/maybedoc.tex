@@ -293,28 +293,5 @@ commands, respectively.
 \end{center}
 
 
-\section{Dice}
-This package provides a TiKZ-based alternative to \texttt{epsdice}.
-
-\begin{center}
-    \newcommand{\noepsdice}{\phantom{\epsdice{1}}}
-    \newcommand{\epsdicecommand}[1]{\command{epsdice}\{\texttt{#1}\}}
-    \newcommand{\maybedicecommand}[1]{\command{maybedice}\{\texttt{#1}\}}
-    \begin{tabular}{@{} l c @{}}
-        \toprule
-        \texttt{maybedice} command  & output of \texttt{epsdice} / \texttt{maybedice} / \texttt{maybevardice}  \\ \midrule
-        \maybedicecommand{1}        & \epsdice{1} / \maybedice{1} / \maybevardice{1} \\
-        \maybedicecommand{2}        & \epsdice{2} / \maybedice{2} / \maybevardice{2} \\
-        \maybedicecommand{3}        & \epsdice{3} / \maybedice{3} / \maybevardice{3} \\
-        \maybedicecommand{4}        & \epsdice{4} / \maybedice{4} / \maybevardice{4} \\
-        \maybedicecommand{5}        & \epsdice{5} / \maybedice{5} / \maybevardice{5} \\
-        \maybedicecommand{6}        & \epsdice{6} / \maybedice{6} / \maybevardice{6} \\
-        \maybedicecommand{7}        & \noepsdice\ / \maybedice{7} / \maybevardice{7} \\
-        \maybedicecommand{8}        & \noepsdice\ / \maybedice{8} / \maybevardice{8} \\
-        \maybedicecommand{9}        & \noepsdice\ / \maybedice{9} / \maybevardice{9} \\
-        \bottomrule
-    \end{tabular}
-\end{center}
-
 
 \end{document}

@@ -1,0 +1,70 @@
+
+\documentclass[11pt]{article}
+\usepackage[margin=1.3in]{geometry}
+\usepackage{hyperref}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{epsdice}
+
+\usepackage{../maybedice}
+
+\newcommand{\command}[1]{\text{\textbackslash}\texttt{#1}}
+\newcommand{\param}[1]{\{\text{$\langle$}\texttt{#1}\text{$\rangle$}\}}
+\newcommand{\optparam}[1]{[\text{$\langle$}\texttt{#1}\text{$\rangle$}]}
+
+
+\begin{document}
+
+\section{Motivation}
+This package provides a TiKZ-based alternative to \texttt{epsdice}, and extends it somewhat.
+
+The styling of the commands can be overridden by
+\begin{align*}
+    &\command{maybedice\,setdotstyle}\param{style} \\
+    &\command{maybedice\,setnodestyle}\param{style} \\
+    &\command{maybedice\,setborderstyle}\param{style}
+\end{align*}
+or reset to default by \command{maybedice\,resetstyles}.
+
+% TODO: document geometry setup.
+
+\section{Inspired by epsdice}
+\begin{center}
+    \newcommand{\noepsdice}{\phantom{\epsdice{1}}}
+    \newcommand{\epsdicecommand}[1]{\command{epsdice}\{\texttt{#1}\}}
+    \newcommand{\maybedicecommand}[1]{\command{maybedice}\{\texttt{#1}\}}
+    \begin{tabular}{@{} l c @{}}
+        \toprule
+        \texttt{maybedice} command  & output of \texttt{epsdice} / \texttt{maybedice} / \texttt{maybevardice}  \\ \midrule
+        \maybedicecommand{1}        & \epsdice{1} / \maybedice{1} / \maybevardice{1} \\
+        \maybedicecommand{2}        & \epsdice{2} / \maybedice{2} / \maybevardice{2} \\
+        \maybedicecommand{3}        & \epsdice{3} / \maybedice{3} / \maybevardice{3} \\
+        \maybedicecommand{4}        & \epsdice{4} / \maybedice{4} / \maybevardice{4} \\
+        \maybedicecommand{5}        & \epsdice{5} / \maybedice{5} / \maybevardice{5} \\
+        \maybedicecommand{6}        & \epsdice{6} / \maybedice{6} / \maybevardice{6} \\
+        \maybedicecommand{7}        & \noepsdice\ / \maybedice{7} / \maybevardice{7} \\
+        \maybedicecommand{8}        & \noepsdice\ / \maybedice{8} / \maybevardice{8} \\
+        \maybedicecommand{9}        & \noepsdice\ / \maybedice{9} / \maybevardice{9} \\
+        \bottomrule
+    \end{tabular}
+\end{center}
+
+\section{Origami}
+In addition to individual dice faces, the command
+\[
+    \command{maybetinyorigamidice}\param{facelabels}
+\]
+provides an in-text origami of a die, where \texttt{facelabels} is a comma-separated list of the labels on the faces of the die.
+The standard die would look like this: \maybetinyorigamidice{2, 3, 5, 4, 6, 1}.
+
+The
+\[
+    \command{maybeorigamidice}\param{facelabels}
+\]
+command provides a full-sized origami of a die:
+\[
+    \maybeorigamidice{2, 3, 5, 4, 6, 1}
+\]
+
+
+\end{document}
