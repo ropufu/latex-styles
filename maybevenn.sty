@@ -1,0 +1,208 @@
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{maybevenn}[2025/05/22 v0.1 (G Sokolov)]
+\PackageInfo{maybevenn}{Venn diagrams simplified}
+
+\RequirePackage{amsmath}
+\RequirePackage{ifthen}
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+
+
+% ~~ Auxiliary ~~
+
+% Calculates Tikz coordinates for two intersecting circles. Arguments are: (x_1, y_1, r_1, x_2, y_2, r_2).
+% Creates variables: \upX, \upY, \downX, \downY, \upAngleA, \upAngleB, \downAngleA, \downAngleB.
+% Creates coordinates: (inter1), (inter2), (centerA), (centerB).
+\newcommand{\maybeCrossCircles}[6]{%
+    \path
+        let
+            \n{ax} = {#1},
+            \n{ay} = {#2},
+            \n{ar} = {#3},
+            \n{bx} = {#4},
+            \n{by} = {#5},
+            \n{br} = {#6},
+            \n{dist} = {veclen(\n{bx} - \n{ax}, \n{by} - \n{ay})},
+            \n{cos} = {(\n{bx} - \n{ax}) / \n{dist}},
+            \n{sin} = {(\n{by} - \n{ay}) / \n{dist}},
+            \n1 = {\n{dist} - \n{ar} - \n{br}},
+            \n2 = {\n{dist} - \n{ar} + \n{br}},
+            \n3 = {\n{dist} + \n{ar} - \n{br}},
+            \n4 = {\n{dist} + \n{ar} + \n{br}},
+            \n5 = {0.5*(\n{dist} * \n{dist} + \n{ar} * \n{ar} - \n{br} * \n{br}) / \n{dist}},
+            \n6 = {0.5*sqrt(-\n1 * \n2 * \n3 * \n4) / \n{dist}},
+            \n{upX} = {\n5 * \n{cos} - \n6 * \n{sin} + \n{ax}},
+            \n{upY} = {\n5 * \n{sin} + \n6 * \n{cos} + \n{ay}},
+            \n{downX} = {\n5 * \n{cos} + \n6 * \n{sin} + \n{ax}},
+            \n{downY} = {\n5 * \n{sin} - \n6 * \n{cos} + \n{ay}},
+            \n{upAngleA} = {acos((\n{upX} - \n{ax}) / \n{ar}) * sign(\n{upY} - \n{ay})},
+            \n{upAngleB} = {acos((\n{upX} - \n{bx}) / \n{br}) * sign(\n{upY} - \n{by})},
+            \n{downAngleA} = {acos((\n{downX} - \n{ax} ) / \n{ar}) * sign(\n{downY} - \n{ay})},
+            \n{downAngleB} = {acos((\n{downX} - \n{bx}) / \n{br}) * sign(\n{downY} - \n{by})}
+        in
+        \pgfextra{\xdef\upX{\n{upX}}}
+        \pgfextra{\xdef\upY{\n{upY}}}
+        \pgfextra{\xdef\downX{\n{downX}}}
+        \pgfextra{\xdef\downY{\n{downY}}}
+        \pgfextra{\xdef\upAngleA{\n{upAngleA}}}
+        \pgfextra{\xdef\upAngleB{\n{upAngleB}}}
+        \pgfextra{\xdef\downAngleA{\n{downAngleA}}}
+        \pgfextra{\xdef\downAngleB{\n{downAngleB}}}
+        (\n{upX}, \n{upY}) coordinate (inter1)
+        (\n{downX}, \n{downY}) coordinate (inter2)
+        (\n{ax}, \n{ay}) coordinate (centerA)
+        (\n{bx}, \n{by}) coordinate (centerB);
+} % \maybeCrossCircles
+
+% ~~ Venn diagrams ~~
+
+% Draw a (left--right) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style left.
+% -- 6: style right.
+\newcommand{\maybeVennPizzaLR}[6]{
+    \draw[#4] #1 circle (#2);
+    % Left hemisphere.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (90+\n{phi} : #3) arc (90+\n{phi} : 270-\n{phi} : #3) -- cycle;
+    % Right hemisphere.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : -90+\n{phi}: #3) -- cycle;
+} % \maybeVennPizzaLR
+
+% Draw a (top--bottom) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style top.
+% -- 6: style bottom.
+\newcommand{\maybeVennPizzaTB}[6]{
+    \draw[#4] #1 circle (#2);
+    % Top hemisphere.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (0+\n{phi} : #3) arc (0+\n{phi} : 180-\n{phi} : #3) -- cycle;
+    % Bottom hemisphere.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (0-\n{phi} : #3) arc (0-\n{phi} : -180+\n{phi}: #3) -- cycle;
+} % \maybeVennPizzaTB
+
+% Draw a (left top--left bottom--right) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style left top.
+% -- 6: style left bottom.
+% -- 7: style right.
+\newcommand{\maybeVennPizzaLLR}[7]{
+    \draw[#4] #1 circle (#2);
+    % Left top quadrant.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90+\n{phi} : #3) arc (90+\n{phi} : 180-\n{phi} : #3) -- ($#1 + (-\n{delta},\n{delta})$) -- cycle;
+    % Left bottom quadrant.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (-90-\n{phi} : #3) arc (-90-\n{phi} : -180+\n{phi} : #3) -- ($#1 + (-\n{delta},-\n{delta})$) -- cycle;
+    % Right hemisphere.
+    \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : -90+\n{phi}: #3) -- cycle;
+} % \maybeVennPizzaLLR
+
+% Draw a (left--right top--right bottom) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style left.
+% -- 6: style right top.
+% -- 7: style right bottom.
+\newcommand{\maybeVennPizzaLRR}[7]{
+    \draw[#4] #1 circle (#2);
+    % Left hemisphere.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (90+\n{phi} : #3) arc (90+\n{phi} : 270-\n{phi} : #3) -- cycle;
+    % Right top quadrant.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : 0+\n{phi} : #3) -- ($#1 + (\n{delta},\n{delta})$) -- cycle;
+    % Right bottom quadrant.
+    \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (-90+\n{phi} : #3) arc (-90+\n{phi} : 0-\n{phi} : #3) -- ($#1 + (\n{delta},-\n{delta})$) -- cycle;
+} % \maybeVennPizzaLRR
+
+% Draws a (left top--right top--bottom) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style left top.
+% -- 6: style right top.
+% -- 7: style bottom.
+\newcommand{\maybeVennPizzaTTB}[7]{
+    \draw[#4] #1 circle (#2);
+    % Left top quadrant.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90+\n{phi} : #3) arc (90+\n{phi} : 180-\n{phi} : #3) -- ($#1 + (-\n{delta},\n{delta})$) -- cycle;
+    % Right top quadrant.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : 0+\n{phi} : #3) -- ($#1 + (\n{delta},\n{delta})$) -- cycle;
+    % Bottom hemisphere.
+    \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (0-\n{phi} : #3) arc (0-\n{phi} : -180+\n{phi}: #3) -- cycle;
+} % \maybeVennPizzaTTB
+
+% Draws a (top--left bottom--right bottom) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style top.
+% -- 6: style left bottom.
+% -- 7: style right bottom.
+\newcommand{\maybeVennPizzaTBB}[7]{
+    \draw[#4] #1 circle (#2);
+    % Left top quadrant.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90+\n{phi} : #3) arc (90+\n{phi} : 180-\n{phi} : #3) -- ($#1 + (-\n{delta},\n{delta})$) -- cycle;
+    % Right top quadrant.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : 0+\n{phi} : #3) -- ($#1 + (\n{delta},\n{delta})$) -- cycle;
+    % Bottom hemisphere.
+    \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))} in
+        #1 ++ (0-\n{phi} : #3) arc (0-\n{phi} : -180+\n{phi}: #3) -- cycle;
+} % \maybeVennPizzaTBB
+
+% Draws a (left top--left bottom--right top--right bottom) Venn diagram.
+% Arguments:
+% -- 1: (x, y).
+% -- 2: outer radius.
+% -- 3: inner radius.
+% -- 4: style outer.
+% -- 5: style left top.
+% -- 6: style left bottom.
+% -- 7: style right top.
+% -- 8: style right bottom.
+\newcommand{\maybeVennPizzaLRTB}[8]{
+    \draw[#4] #1 circle (#2);
+    % Left top quadrant.
+    \draw[#5] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90+\n{phi} : #3) arc (90+\n{phi} : 180-\n{phi} : #3) -- ($#1 + (-\n{delta},\n{delta})$) -- cycle;
+    % Left bottom quadrant.
+    \draw[#6] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (-90-\n{phi} : #3) arc (-90-\n{phi} : -180+\n{phi} : #3) -- ($#1 + (-\n{delta},-\n{delta})$) -- cycle;
+    % Right top quadrant.
+    \draw[#7] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (90-\n{phi} : #3) arc (90-\n{phi} : 0+\n{phi} : #3) -- ($#1 + (\n{delta},\n{delta})$) -- cycle;
+    % Right bottom quadrant.
+    \draw[#8] let \n{phi} = {asin((#2-#3)/(2*#3))}, \n{delta} = {(#2-#3)/2} in
+        #1 ++ (-90+\n{phi} : #3) arc (-90+\n{phi} : 0-\n{phi} : #3) -- ($#1 + (\n{delta},-\n{delta})$) -- cycle;
+} % \maybeVennPizzaLRTB
