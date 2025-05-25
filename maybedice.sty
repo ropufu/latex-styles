@@ -163,8 +163,8 @@
             \draw[maybedice@borderstlye] (-5 * \r, \r) -- (3 * \r, \r) -- (3 * \r, -\r) -- (-5 * \r, -\r) -- (-5 * \r, \r);
             \draw[maybedice@borderstlye] (-\r, 3 * \r) -- (\r, 3 * \r) -- (\r, -3 * \r) -- (-\r, -3 * \r) -- (-\r, 3 * \r);
             \draw[maybedice@borderstlye] (-3 * \r, \r) -- (-3 * \r, -\r);
-        	\foreach \i in {0, ..., 3} {
-                \draw (-4 * \r + 2 * \r * \i, 0) node[maybedice@nodestlye] {\tiny\maybedice@list[\i + 1]};
+        	\foreach \i in {1, ..., 4} {
+                \draw (-6 * \r + 2 * \r * \i, 0) node[maybedice@nodestlye] {\tiny\maybedice@list[\i]};
             } % \foreach
 
             \draw (0, 2 * \r) node[maybedice@nodestlye] {\tiny\maybedice@list[5]};
@@ -187,8 +187,8 @@
             \draw[maybedice@borderstlye] (-5 * \r, \r) -- (3 * \r, \r) -- (3 * \r, -\r) -- (-5 * \r, -\r) -- (-5 * \r, \r);
             \draw[maybedice@borderstlye] (-\r, 3 * \r) -- (\r, 3 * \r) -- (\r, -3 * \r) -- (-\r, -3 * \r) -- (-\r, 3 * \r);
             \draw[maybedice@borderstlye] (-3 * \r, \r) -- (-3 * \r, -\r);
-        	\foreach \i in {0, ..., 3} {
-                \draw (-4 * \r + 2 * \r * \i, 0) node[maybedice@nodestlye] {\maybedice@list[\i + 1]};
+        	\foreach \i in {1, ..., 4} {
+                \draw (-6 * \r + 2 * \r * \i, 0) node[maybedice@nodestlye] {\maybedice@list[\i]};
             } % \foreach
 
             \draw (0, 2 * \r) node[maybedice@nodestlye] {\maybedice@list[5]};
