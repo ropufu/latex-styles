@@ -48,6 +48,7 @@
 
 % ~~ TikZ styles ~~
 \tikzset{maybe@barstyle/.style={thick, fill=white}}
+\tikzset{maybe@barknobstyle/.style={}}
 \tikzset{maybe@boxstyle/.style={thick, fill=white}}
 \tikzset{maybe@medianstyle/.style={thick}}
 \tikzset{maybe@whiskerstyle/.style={thick}}
@@ -59,6 +60,7 @@
 
 \newcommand{\mayberesetstyles}{
     \tikzset{maybe@barstyle/.style={thick, fill=white}}
+    \tikzset{maybe@barknobstyle/.style={}}
     \tikzset{maybe@boxstyle/.style={thick, fill=white}}
     \tikzset{maybe@medianstyle/.style={thick}}
     \tikzset{maybe@whiskerstyle/.style={thick}}
@@ -199,17 +201,17 @@
 % Example: \maybeHAxis[$X$]{17, 29}{0};
 \newcommand{\maybeHAxis}[3][]{%
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
-    \pgfmathsetmacro{\maybe@temp@from}{\maybe@xscale * min(#2)}
-    \pgfmathsetmacro{\maybe@temp@to}{\maybe@xscale * max(#2)}
-    \pgfmathsetmacro{\maybe@temp@y}{\maybe@yscale * (#3)}
+    \pgfmathsetmacro{\maybe@@from}{\maybe@xscale * min(#2)}
+    \pgfmathsetmacro{\maybe@@to}{\maybe@xscale * max(#2)}
+    \pgfmathsetmacro{\maybe@@y}{\maybe@yscale * (#3)}
     \ifthenelse{\equal{\maybe@axissign}{1}}%
         {\draw[->, maybe@axisstyle]
-            ([xshift = -\maybe@xaxisextendfrom] \maybe@temp@from, \maybe@temp@y) --
-            ([xshift = \maybe@xaxisextendto] \maybe@temp@to, \maybe@temp@y) node[right, maybe@nodestlye] {#1};}{}
+            ([xshift = -\maybe@xaxisextendfrom] \maybe@@from, \maybe@@y) --
+            ([xshift = \maybe@xaxisextendto] \maybe@@to, \maybe@@y) node[right, maybe@nodestlye] {#1};}{}
     \ifthenelse{\equal{\maybe@axissign}{-1}}%
         {\draw[->, maybe@axisstyle]
-            ([xshift = \maybe@xaxisextendfrom] \maybe@temp@from, \maybe@temp@y) --
-            ([xshift = -\maybe@xaxisextendto] \maybe@temp@to, \maybe@temp@y) node[left, maybe@nodestlye] {#1};}{}
+            ([xshift = \maybe@xaxisextendfrom] \maybe@@from, \maybe@@y) --
+            ([xshift = -\maybe@xaxisextendto] \maybe@@to, \maybe@@y) node[left, maybe@nodestlye] {#1};}{}
 } % \maybeHAxis
 
 % Draw a horizontal axis pointing to the right if \maybexscale > 0 and left if \maybexscale < 0.
@@ -221,17 +223,17 @@
 % Example: \maybeVAxis[$Y$]{17, 29}{0};
 \newcommand{\maybeVAxis}[3][]{%
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
-    \pgfmathsetmacro{\maybe@temp@from}{\maybe@yscale * min(#2)}
-    \pgfmathsetmacro{\maybe@temp@to}{\maybe@yscale * max(#2)}
-    \pgfmathsetmacro{\maybe@temp@x}{\maybe@xscale * (#3)}
+    \pgfmathsetmacro{\maybe@@from}{\maybe@yscale * min(#2)}
+    \pgfmathsetmacro{\maybe@@to}{\maybe@yscale * max(#2)}
+    \pgfmathsetmacro{\maybe@@x}{\maybe@xscale * (#3)}
     \ifthenelse{\equal{\maybe@axissign}{1}}%
         {\draw[->, maybe@axisstyle]
-            ([yshift = -\maybe@yaxisextendfrom] \maybe@temp@x, \maybe@temp@from) --
-            ([yshift = \maybe@yaxisextendto] \maybe@temp@x, \maybe@temp@to) node[above, maybe@nodestlye] {#1};}{}
+            ([yshift = -\maybe@yaxisextendfrom] \maybe@@x, \maybe@@from) --
+            ([yshift = \maybe@yaxisextendto] \maybe@@x, \maybe@@to) node[above, maybe@nodestlye] {#1};}{}
     \ifthenelse{\equal{\maybe@axissign}{-1}}%
         {\draw[->, maybe@axisstyle]
-            ([yshift = \maybe@yaxisextendfrom] \maybe@temp@x, \maybe@temp@from) --
-            ([yshift = -\maybe@yaxisextendto] \maybe@temp@x, \maybe@temp@to) node[below, maybe@nodestlye] {#1};}{}
+            ([yshift = \maybe@yaxisextendfrom] \maybe@@x, \maybe@@from) --
+            ([yshift = -\maybe@yaxisextendto] \maybe@@x, \maybe@@to) node[below, maybe@nodestlye] {#1};}{}
 } % \maybeVAxis
 
 % Draw a horizontal sequence of labels.
@@ -240,21 +242,18 @@
 % -- 3: shared y-location.
 % Note: all lists should be comma-separated.
 \newcommand{\maybeHLabels}[3][@]{%
-    \readlist\maybe@temp@list{#2}
-    \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
-    \pgfmathsetmacro{\maybe@temp@nodeoffset}{-sign(\maybe@yscale) * \maybe@axisnodeoffset}
-    % ~~ Bars ~~
-	\foreach \i in {0, ..., \maybe@temp@lastindex} {
-        \pgfmathparse{{#2}[\i]};
-        \let\maybe@temp@xcoordinate\pgfmathresult;
-        \ifthenelse{\equal{#1}{@}}{
-            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#3)}) node[yshift = \maybe@temp@nodeoffset, maybe@nodestlye] {$\maybe@temp@xcoordinate$};
-        }{
-            \pgfmathparse{{#1}[\i]};
-            \let\maybe@temp@xlabel\pgfmathresult;
-            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#3)}) node[yshift = \maybe@temp@nodeoffset, maybe@nodestlye] {\maybe@temp@xlabel};
-        }
-    } % \foreach
+    \readlist*\maybe@@coordinates{#2}
+    \pgfmathsetmacro{\maybe@@y}{\maybe@yscale * (#3)}
+    \pgfmathsetmacro{\maybe@@nodeoffset}{-sign(\maybe@yscale) * \maybe@axisnodeoffset}
+    % ~~ Labels ~~
+    \ifthenelse{\equal{#1}{@}}{
+    	\foreach \i in {1, ..., \maybe@@coordinateslen}
+            \draw (\maybe@xscale * \maybe@@coordinates[\i], \maybe@@y) node[yshift = \maybe@@nodeoffset, maybe@nodestlye] {$\maybe@@coordinates[\i]$};
+    }{
+        \readlist*\maybe@@labels{#1}
+    	\foreach \i in {1, ..., \maybe@@coordinateslen}
+            \draw (\maybe@xscale * \maybe@@coordinates[\i], \maybe@@y) node[yshift = \maybe@@nodeoffset, maybe@nodestlye] {\maybe@@labels[\i]};
+    }
 } % \maybeHLabels
 
 % Draw a horizontal sequence of labels.
@@ -263,49 +262,43 @@
 % -- 3: shared x-location.
 % Note: all lists should be comma-separated.
 \newcommand{\maybeVLabels}[3][@]{%
-    \readlist\maybe@temp@list{#2}
-    \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
-    \pgfmathsetmacro{\maybe@temp@nodeoffset}{-sign(\maybe@xscale) * \maybe@axisnodeoffset}
-    % ~~ Bars ~~
-	\foreach \i in {0, ..., \maybe@temp@lastindex} {
-        \pgfmathparse{{#2}[\i]};
-        \let\maybe@temp@ycoordinate\pgfmathresult;
-        \ifthenelse{\equal{#1}{@}}{
-            \draw ({\maybe@xscale * (#3)}, \maybe@yscale * \maybe@temp@ycoordinate) node[xshift = \maybe@temp@nodeoffset, maybe@nodestlye] {$\maybe@temp@ycoordinate$};
-        }{
-            \pgfmathparse{{#1}[\i]};
-            \let\maybe@temp@ylabel\pgfmathresult;
-            \draw ({\maybe@xscale * (#3)}, \maybe@yscale * \maybe@temp@ycoordinate) node[xshift = \maybe@temp@nodeoffset, maybe@nodestlye] {\maybe@temp@ylabel};
-        }
-    } % \foreach
+    \readlist*\maybe@@coordinates{#2}
+    \pgfmathsetmacro{\maybe@@x}{\maybe@xscale * (#3)}
+    \pgfmathsetmacro{\maybe@@nodeoffset}{-sign(\maybe@xscale) * \maybe@axisnodeoffset}
+    % ~~ Labels ~~
+    \ifthenelse{\equal{#1}{@}}{
+    	\foreach \i in {1, ..., \maybe@@coordinateslen}
+            \draw (\maybe@@x, \maybe@yscale * \maybe@@coordinates[\i]) node[xshift = \maybe@@nodeoffset, maybe@nodestlye] {$\maybe@@coordinates[\i]$};
+    }{
+        \readlist*\maybe@@labels{#1}
+    	\foreach \i in {1, ..., \maybe@@coordinateslen}
+            \draw (\maybe@@x, \maybe@yscale * \maybe@@coordinates[\i]) node[xshift = \maybe@@nodeoffset, maybe@nodestlye] {\maybe@@labels[\i]};
+    }
 } % \maybeVLabels
 
 % Draw a horizontal sequence of ticks (vertical lines).
 % -- 1: list of x-coordinates.
 % -- 2: y-location of the axis.
 \newcommand{\maybeHTicks}[2]{%
-    \readlist\maybe@temp@list{#1}
-    \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
-    \pgfmathsetmacro{\maybe@temp@y}{\maybe@yscale * (#2)}
+    \readlist*\maybe@@coordinates{#1}
+    \pgfmathsetmacro{\maybe@@y}{\maybe@yscale * (#2)}
     \ifmaybe@ticksabove
-        \pgfmathsetmacro{\maybe@temp@yfrom}{0}
-        \pgfmathsetmacro{\maybe@temp@yto}{sign(\maybe@yscale) * \maybe@tickoffset}
+        \pgfmathsetmacro{\maybe@@yfrom}{0}
+        \pgfmathsetmacro{\maybe@@yto}{sign(\maybe@yscale) * \maybe@tickoffset}
     \fi
     \ifmaybe@ticksbelow
-        \pgfmathsetmacro{\maybe@temp@yfrom}{0}
-        \pgfmathsetmacro{\maybe@temp@yto}{-sign(\maybe@yscale) * \maybe@tickoffset}
+        \pgfmathsetmacro{\maybe@@yfrom}{0}
+        \pgfmathsetmacro{\maybe@@yto}{-sign(\maybe@yscale) * \maybe@tickoffset}
     \fi
     \ifmaybe@tickscenter
-        \pgfmathsetmacro{\maybe@temp@yfrom}{-0.5 * sign(\maybe@yscale) * \maybe@tickoffset}
-        \pgfmathsetmacro{\maybe@temp@yto}{0.5 * sign(\maybe@yscale) * \maybe@tickoffset}
+        \pgfmathsetmacro{\maybe@@yfrom}{-0.5 * sign(\maybe@yscale) * \maybe@tickoffset}
+        \pgfmathsetmacro{\maybe@@yto}{0.5 * sign(\maybe@yscale) * \maybe@tickoffset}
     \fi
     % ~~ Ticks ~~
-	\foreach \i in {0, ..., \maybe@temp@lastindex} {
-        \pgfmathparse{{#1}[\i]};
-        \let\maybe@temp@xcoordinate\pgfmathresult;
+	\foreach \i in {1, ..., \maybe@@coordinateslen} {
         \draw[maybe@tickstlye]
-            ([yshift = \maybe@temp@yfrom] \maybe@xscale * \maybe@temp@xcoordinate, \maybe@temp@y) --
-            ([yshift = \maybe@temp@yto] \maybe@xscale * \maybe@temp@xcoordinate, \maybe@temp@y);
+            ([yshift = \maybe@@yfrom] \maybe@xscale * \maybe@@coordinates[\i], \maybe@@y) --
+            ([yshift = \maybe@@yto] \maybe@xscale * \maybe@@coordinates[\i], \maybe@@y);
     } % \foreach
 } % \maybeHTicks
 
@@ -313,28 +306,25 @@
 % -- 1: list of y-coordinates.
 % -- 2: x-location of the axis.
 \newcommand{\maybeVTicks}[2]{%
-    \readlist\maybe@temp@list{#1}
-    \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
-    \pgfmathsetmacro{\maybe@temp@x}{\maybe@xscale * (#2)}
+    \readlist*\maybe@@coordinates{#1}
+    \pgfmathsetmacro{\maybe@@x}{\maybe@xscale * (#2)}
     \ifmaybe@ticksabove
-        \pgfmathsetmacro{\maybe@temp@xfrom}{0}
-        \pgfmathsetmacro{\maybe@temp@xto}{sign(\maybe@xscale) * \maybe@tickoffset}
+        \pgfmathsetmacro{\maybe@@xfrom}{0}
+        \pgfmathsetmacro{\maybe@@xto}{sign(\maybe@xscale) * \maybe@tickoffset}
     \fi
     \ifmaybe@ticksbelow
-        \pgfmathsetmacro{\maybe@temp@xfrom}{0}
-        \pgfmathsetmacro{\maybe@temp@xto}{-sign(\maybe@xscale) * \maybe@tickoffset}
+        \pgfmathsetmacro{\maybe@@xfrom}{0}
+        \pgfmathsetmacro{\maybe@@xto}{-sign(\maybe@xscale) * \maybe@tickoffset}
     \fi
     \ifmaybe@tickscenter
-        \pgfmathsetmacro{\maybe@temp@xfrom}{-0.5 * sign(\maybe@xscale) * \maybe@tickoffset}
-        \pgfmathsetmacro{\maybe@temp@xto}{0.5 * sign(\maybe@xscale) * \maybe@tickoffset}
+        \pgfmathsetmacro{\maybe@@xfrom}{-0.5 * sign(\maybe@xscale) * \maybe@tickoffset}
+        \pgfmathsetmacro{\maybe@@xto}{0.5 * sign(\maybe@xscale) * \maybe@tickoffset}
     \fi
     % ~~ Ticks ~~
-	\foreach \i in {0, ..., \maybe@temp@lastindex} {
-        \pgfmathparse{{#1}[\i]};
-        \let\maybe@temp@ycoordinate\pgfmathresult;
+	\foreach \i in {1, ..., \maybe@@coordinateslen} {
         \draw[maybe@tickstlye]
-            ([xshift = \maybe@temp@xfrom] \maybe@temp@x, \maybe@yscale * \maybe@temp@ycoordinate) --
-            ([xshift = \maybe@temp@xto] \maybe@temp@x, \maybe@yscale * \maybe@temp@ycoordinate);
+            ([xshift = \maybe@@xfrom] \maybe@@x, \maybe@yscale * \maybe@@coordinates[\i]) --
+            ([xshift = \maybe@@xto] \maybe@@x, \maybe@yscale * \maybe@@coordinates[\i]);
     } % \foreach
 } % \maybeVTicks
 
@@ -346,33 +336,38 @@
 % -- 4: y-location of the axis.
 % Note: all lists should be comma-separated.
 \newcommand{\maybeVBars}[4][@]{%
-    \readlist\maybe@temp@list{#2}
-    \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
+    \readlist*\maybe@@coordinates{#2}
+    \readlist*\maybe@@lengths{#3}
+    \pgfmathsetmacro{\maybe@@y}{\maybe@yscale * (#4)}
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@yscale)}
-    % ~~ Bars ~~
-	\foreach \i in {0, ..., \maybe@temp@lastindex} {
-        \pgfmathparse{{#2}[\i]};
-        \let\maybe@temp@xcoordinate\pgfmathresult;
-        \pgfmathparse{{#3}[\i]};
-        \let\maybe@temp@length\pgfmathresult;
-        \ifthenelse{\equal{#1}{@}}{}{%
-            \pgfmathparse{{#1}[\i]};}
-        \let\maybe@temp@label\pgfmathresult;
-        \fill[maybe@dotstyle] (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)}) circle (\maybe@barknobradius);
-
-        \ifmaybe@printbarlabels
-            \ifnum\maybe@axissign=1
-                \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)}) node[above, maybe@nodestlye] {\maybe@temp@label};
-            \else
-                \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)}) node[below, maybe@nodestlye] {\maybe@temp@label};
-            \fi
-        \else
-            \draw (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)});
-        \fi
+    % ~~ Bars and knobs ~~
+    \foreach \i in {1, ..., \maybe@@coordinateslen} {
         \draw[maybe@barstyle]
-            (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * (#4)}) --
-            (\maybe@xscale * \maybe@temp@xcoordinate, {\maybe@yscale * ((#4) + \maybe@temp@length)});
+            (\maybe@xscale * \maybe@@coordinates[\i], \maybe@@y) --
+            (\maybe@xscale * \maybe@@coordinates[\i], \maybe@@y + \maybe@yscale * \maybe@@lengths[\i]);
+        \fill[maybe@barknobstyle] (\maybe@xscale * \maybe@@coordinates[\i], \maybe@@y + \maybe@yscale * \maybe@@lengths[\i]) circle (\maybe@barknobradius);
     } % \foreach
+    % ~~ Labels ~~
+    \ifmaybe@printbarlabels
+        \ifthenelse{\equal{#1}{@}}{%
+        	\foreach \i in {1, ..., \maybe@@coordinateslen} {
+                \ifnum\maybe@axissign=1
+                    \draw (\maybe@xscale * \maybe@@coordinates[\i], \maybe@@y + \maybe@yscale * \maybe@@lengths[\i]) node[above, maybe@nodestlye] {$\maybe@@lengths[\i]$};
+                \else
+                    \draw (\maybe@xscale * \maybe@@coordinates[\i], \maybe@@y + \maybe@yscale * \maybe@@lengths[\i]) node[below, maybe@nodestlye] {$\maybe@@lengths[\i]$};
+                \fi
+            } % \foreach
+        }{%
+            \readlist*\maybe@@labels{#1}
+        	\foreach \i in {1, ..., \maybe@@coordinateslen} {
+                \ifnum\maybe@axissign=1
+                    \draw (\maybe@xscale * \maybe@@coordinates[\i], \maybe@@y + \maybe@yscale * \maybe@@lengths[\i]) node[above, maybe@nodestlye] {\maybe@@labels[\i]};
+                \else
+                    \draw (\maybe@xscale * \maybe@@coordinates[\i], \maybe@@y + \maybe@yscale * \maybe@@lengths[\i]) node[below, maybe@nodestlye] {\maybe@@labels[\i]};
+                \fi
+            } % \foreach
+        }
+    \fi
 } % \maybeVBars
 
 % Draw horizontal lines.
@@ -383,33 +378,38 @@
 % -- 4: x-location of the axis.
 % Note: all lists should be comma-separated.
 \newcommand{\maybeHBars}[4][@]{%
-    \readlist\maybe@temp@list{#2}
-    \pgfmathtruncatemacro{\maybe@temp@lastindex}{\maybe@temp@listlen - 1}
+    \readlist*\maybe@@coordinates{#2}
+    \readlist*\maybe@@lengths{#3}
+    \pgfmathsetmacro{\maybe@@x}{\maybe@xscale * (#4)}
     \pgfmathsetmacro{\maybe@axissign}{sign(\maybe@xscale)}
-    % ~~ Bars ~~
-	\foreach \i in {0, ..., \maybe@temp@lastindex} {
-        \pgfmathparse{{#2}[\i]};
-        \let\maybe@temp@ycoordinate\pgfmathresult;
-        \pgfmathparse{{#3}[\i]};
-        \let\maybe@temp@length\pgfmathresult;
-        \ifthenelse{\equal{#1}{@}}{}{%
-            \pgfmathparse{{#1}[\i]};}
-        \let\maybe@temp@label\pgfmathresult;
-        \fill[maybe@dotstyle] ({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) circle (\maybe@barknobradius);
-
-        \ifmaybe@printbarlabels
-            \ifnum\maybe@axissign=1
-                \draw({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) node[right, maybe@nodestlye] {\maybe@temp@label};
-            \else
-                \draw({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate) node[left, maybe@nodestlye] {\maybe@temp@label};
-            \fi
-        \else
-            \draw({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate);
-        \fi
+    % ~~ Bars and knobs ~~
+    \foreach \i in {1, ..., \maybe@@coordinateslen} {
         \draw[maybe@barstyle]
-            ({\maybe@xscale * (#4)}, \maybe@yscale * \maybe@temp@ycoordinate) --
-            ({\maybe@xscale * ((#4) + \maybe@temp@length)}, \maybe@yscale * \maybe@temp@ycoordinate);
+            (\maybe@@x, \maybe@yscale * \maybe@@coordinates[\i]) --
+            (\maybe@@x + \maybe@xscale * \maybe@@lengths[\i], \maybe@yscale * \maybe@@coordinates[\i]);
+        \fill[maybe@barknobstyle] (\maybe@@x + \maybe@xscale * \maybe@@lengths[\i], \maybe@yscale * \maybe@@coordinates[\i]) circle (\maybe@barknobradius);
     } % \foreach
+    % ~~ Labels ~~
+    \ifmaybe@printbarlabels
+        \ifthenelse{\equal{#1}{@}}{%
+        	\foreach \i in {1, ..., \maybe@@coordinateslen} {
+                \ifnum\maybe@axissign=1
+                    \draw (\maybe@@x + \maybe@xscale * \maybe@@lengths[\i], \maybe@yscale * \maybe@@coordinates[\i]) node[right, maybe@nodestlye] {$\maybe@@lengths[\i]$};
+                \else
+                    \draw (\maybe@@x + \maybe@xscale * \maybe@@lengths[\i], \maybe@yscale * \maybe@@coordinates[\i]) node[left, maybe@nodestlye] {$\maybe@@lengths[\i]$};
+                \fi
+            } % \foreach
+        }{%
+            \readlist*\maybe@@labels{#1}
+        	\foreach \i in {1, ..., \maybe@@coordinateslen} {
+                \ifnum\maybe@axissign=1
+                    \draw (\maybe@@x + \maybe@xscale * \maybe@@lengths[\i], \maybe@yscale * \maybe@@coordinates[\i]) node[right, maybe@nodestlye] {\maybe@@labels[\i]};
+                \else
+                    \draw (\maybe@@x + \maybe@xscale * \maybe@@lengths[\i], \maybe@yscale * \maybe@@coordinates[\i]) node[left, maybe@nodestlye] {\maybe@@labels[\i]};
+                \fi
+            } % \foreach
+        }
+    \fi
 } % \maybeHBars
 
 % Draw a vertical histogram rectangle.
@@ -488,24 +488,24 @@
 % -- 2: y-coordinate.
 % -- 3: height of the box.
 \newcommand{\maybeHBoxPlot}[3]{%
-    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@temp@a}{\maybe@xscale * \pgfmathresult};
-    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@temp@b}{\maybe@xscale * \pgfmathresult};
-    \pgfmathparse{{#1}[2]}; \pgfmathsetmacro{\maybe@temp@c}{\maybe@xscale * \pgfmathresult};
-    \pgfmathparse{{#1}[3]}; \pgfmathsetmacro{\maybe@temp@d}{\maybe@xscale * \pgfmathresult};
-    \pgfmathparse{{#1}[4]}; \pgfmathsetmacro{\maybe@temp@e}{\maybe@xscale * \pgfmathresult};
-    \pgfmathsetmacro{\maybe@temp@y}{\maybe@yscale * (#2)}
-    \pgfmathsetmacro{\maybe@temp@boxfrom}{\maybe@temp@y - \maybe@yscale * 0.5 * (#3)}
-    \pgfmathsetmacro{\maybe@temp@boxto}{\maybe@temp@y + \maybe@yscale * 0.5 * (#3)}
-    \pgfmathsetmacro{\maybe@temp@whiskerfrom}{\maybe@temp@y - \maybe@yscale * 0.5 * \maybe@whiskertoboxratio * (#3)}
-    \pgfmathsetmacro{\maybe@temp@whiskerto}{\maybe@temp@y + \maybe@yscale * 0.5 * \maybe@whiskertoboxratio * (#3)}
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@@a}{\maybe@xscale * \pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@@b}{\maybe@xscale * \pgfmathresult};
+    \pgfmathparse{{#1}[2]}; \pgfmathsetmacro{\maybe@@c}{\maybe@xscale * \pgfmathresult};
+    \pgfmathparse{{#1}[3]}; \pgfmathsetmacro{\maybe@@d}{\maybe@xscale * \pgfmathresult};
+    \pgfmathparse{{#1}[4]}; \pgfmathsetmacro{\maybe@@e}{\maybe@xscale * \pgfmathresult};
+    \pgfmathsetmacro{\maybe@@y}{\maybe@yscale * (#2)}
+    \pgfmathsetmacro{\maybe@@boxfrom}{\maybe@@y - \maybe@yscale * 0.5 * (#3)}
+    \pgfmathsetmacro{\maybe@@boxto}{\maybe@@y + \maybe@yscale * 0.5 * (#3)}
+    \pgfmathsetmacro{\maybe@@whiskerfrom}{\maybe@@y - \maybe@yscale * 0.5 * \maybe@whiskertoboxratio * (#3)}
+    \pgfmathsetmacro{\maybe@@whiskerto}{\maybe@@y + \maybe@yscale * 0.5 * \maybe@whiskertoboxratio * (#3)}
     % ~~ Box ~~
-    \draw[maybe@boxstyle] (\maybe@temp@b, \maybe@temp@boxfrom) rectangle (\maybe@temp@d, \maybe@temp@boxto);
-    \draw[maybe@medianstyle] (\maybe@temp@c, \maybe@temp@boxfrom) -- (\maybe@temp@c, \maybe@temp@boxto);
+    \draw[maybe@boxstyle] (\maybe@@b, \maybe@@boxfrom) rectangle (\maybe@@d, \maybe@@boxto);
+    \draw[maybe@medianstyle] (\maybe@@c, \maybe@@boxfrom) -- (\maybe@@c, \maybe@@boxto);
     % ~~ Whiskers ~~
-    \draw[maybe@whisklinestyle] (\maybe@temp@a, \maybe@temp@y) -- (\maybe@temp@b, \maybe@temp@y);
-    \draw[maybe@whisklinestyle] (\maybe@temp@d, \maybe@temp@y) -- (\maybe@temp@e, \maybe@temp@y);
-    \draw[maybe@whiskerstyle] (\maybe@temp@a, \maybe@temp@whiskerfrom) -- (\maybe@temp@a, \maybe@temp@whiskerto);
-    \draw[maybe@whiskerstyle] (\maybe@temp@e, \maybe@temp@whiskerfrom) -- (\maybe@temp@e, \maybe@temp@whiskerto);
+    \draw[maybe@whisklinestyle] (\maybe@@a, \maybe@@y) -- (\maybe@@b, \maybe@@y);
+    \draw[maybe@whisklinestyle] (\maybe@@d, \maybe@@y) -- (\maybe@@e, \maybe@@y);
+    \draw[maybe@whiskerstyle] (\maybe@@a, \maybe@@whiskerfrom) -- (\maybe@@a, \maybe@@whiskerto);
+    \draw[maybe@whiskerstyle] (\maybe@@e, \maybe@@whiskerfrom) -- (\maybe@@e, \maybe@@whiskerto);
 } % \maybeHBoxPlot
 
 % Draw a vertical box-plot.
@@ -514,22 +514,22 @@
 % -- 2: x-coordinate.
 % -- 3: width of the box.
 \newcommand{\maybeVBoxPlot}[3]{%
-    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@temp@a}{\maybe@yscale * \pgfmathresult};
-    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@temp@b}{\maybe@yscale * \pgfmathresult};
-    \pgfmathparse{{#1}[2]}; \pgfmathsetmacro{\maybe@temp@c}{\maybe@yscale * \pgfmathresult};
-    \pgfmathparse{{#1}[3]}; \pgfmathsetmacro{\maybe@temp@d}{\maybe@yscale * \pgfmathresult};
-    \pgfmathparse{{#1}[4]}; \pgfmathsetmacro{\maybe@temp@e}{\maybe@yscale * \pgfmathresult};
-    \pgfmathsetmacro{\maybe@temp@x}{\maybe@xscale * (#2)}
-    \pgfmathsetmacro{\maybe@temp@boxfrom}{\maybe@temp@x - \maybe@xscale * 0.5 * (#3)}
-    \pgfmathsetmacro{\maybe@temp@boxto}{\maybe@temp@x + \maybe@xscale * 0.5 * (#3)}
-    \pgfmathsetmacro{\maybe@temp@whiskerfrom}{\maybe@temp@x - \maybe@xscale * 0.5 * \maybe@whiskertoboxratio * (#3)}
-    \pgfmathsetmacro{\maybe@temp@whiskerto}{\maybe@temp@x + \maybe@xscale * 0.5 * \maybe@whiskertoboxratio * (#3)}
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@@a}{\maybe@yscale * \pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@@b}{\maybe@yscale * \pgfmathresult};
+    \pgfmathparse{{#1}[2]}; \pgfmathsetmacro{\maybe@@c}{\maybe@yscale * \pgfmathresult};
+    \pgfmathparse{{#1}[3]}; \pgfmathsetmacro{\maybe@@d}{\maybe@yscale * \pgfmathresult};
+    \pgfmathparse{{#1}[4]}; \pgfmathsetmacro{\maybe@@e}{\maybe@yscale * \pgfmathresult};
+    \pgfmathsetmacro{\maybe@@x}{\maybe@xscale * (#2)}
+    \pgfmathsetmacro{\maybe@@boxfrom}{\maybe@@x - \maybe@xscale * 0.5 * (#3)}
+    \pgfmathsetmacro{\maybe@@boxto}{\maybe@@x + \maybe@xscale * 0.5 * (#3)}
+    \pgfmathsetmacro{\maybe@@whiskerfrom}{\maybe@@x - \maybe@xscale * 0.5 * \maybe@whiskertoboxratio * (#3)}
+    \pgfmathsetmacro{\maybe@@whiskerto}{\maybe@@x + \maybe@xscale * 0.5 * \maybe@whiskertoboxratio * (#3)}
     % ~~ Box ~~
-    \draw[maybe@boxstyle] (\maybe@temp@boxfrom, \maybe@temp@b) rectangle (\maybe@temp@boxto, \maybe@temp@d);
-    \draw[maybe@medianstyle] (\maybe@temp@boxfrom, \maybe@temp@c) -- (\maybe@temp@boxto, \maybe@temp@c);
+    \draw[maybe@boxstyle] (\maybe@@boxfrom, \maybe@@b) rectangle (\maybe@@boxto, \maybe@@d);
+    \draw[maybe@medianstyle] (\maybe@@boxfrom, \maybe@@c) -- (\maybe@@boxto, \maybe@@c);
     % ~~ Whiskers ~~
-    \draw[maybe@whisklinestyle] (\maybe@temp@x, \maybe@temp@a) -- (\maybe@temp@x, \maybe@temp@b);
-    \draw[maybe@whisklinestyle] (\maybe@temp@x, \maybe@temp@d) -- (\maybe@temp@x, \maybe@temp@e);
-    \draw[maybe@whiskerstyle] (\maybe@temp@whiskerfrom, \maybe@temp@a) -- (\maybe@temp@whiskerto, \maybe@temp@a);
-    \draw[maybe@whiskerstyle] (\maybe@temp@whiskerfrom, \maybe@temp@e) -- (\maybe@temp@whiskerto, \maybe@temp@e);
+    \draw[maybe@whisklinestyle] (\maybe@@x, \maybe@@a) -- (\maybe@@x, \maybe@@b);
+    \draw[maybe@whisklinestyle] (\maybe@@x, \maybe@@d) -- (\maybe@@x, \maybe@@e);
+    \draw[maybe@whiskerstyle] (\maybe@@whiskerfrom, \maybe@@a) -- (\maybe@@whiskerto, \maybe@@a);
+    \draw[maybe@whiskerstyle] (\maybe@@whiskerfrom, \maybe@@e) -- (\maybe@@whiskerto, \maybe@@e);
 } % \maybeVBoxPlot
