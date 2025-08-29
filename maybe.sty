@@ -47,30 +47,42 @@
 \ProcessOptions\relax
 
 % ~~ TikZ styles ~~
-\tikzset{maybe@barstyle/.style={thick, fill=white}}
-\tikzset{maybe@barknobstyle/.style={}}
-\tikzset{maybe@boxstyle/.style={thick, fill=white}}
-\tikzset{maybe@medianstyle/.style={thick}}
-\tikzset{maybe@whiskerstyle/.style={thick}}
-\tikzset{maybe@whisklinestyle/.style={thick}}
-\tikzset{maybe@dotstyle/.style={color=black, fill=black}}
-\tikzset{maybe@axisstyle/.style={}}
-\tikzset{maybe@nodestlye/.style={}}
-\tikzset{maybe@tickstlye/.style={}}
-
-\newcommand{\mayberesetstyles}{
-    \tikzset{maybe@barstyle/.style={thick, fill=white}}
+\newcommand{\mayberesetbarstyles}{
+    \tikzset{maybe@barstyle/.style={thick, fill = white}}
     \tikzset{maybe@barknobstyle/.style={}}
-    \tikzset{maybe@boxstyle/.style={thick, fill=white}}
+}
+
+\newcommand{\mayberesetboxplotstyles}{
+    \tikzset{maybe@boxstyle/.style={thick, fill = white}}
     \tikzset{maybe@medianstyle/.style={thick}}
     \tikzset{maybe@whiskerstyle/.style={thick}}
     \tikzset{maybe@whisklinestyle/.style={thick}}
-    \tikzset{maybe@dotstyle/.style={color=black, fill=black}}
+}
+
+\newcommand{\mayberesetaxisstyle}{
     \tikzset{maybe@axisstyle/.style={}}
+}
+
+\newcommand{\mayberesetnodestyle}{
     \tikzset{maybe@nodestlye/.style={}}
+}
+
+\newcommand{\mayberesettickstyle}{
     \tikzset{maybe@tickstlye/.style={}}
 }
 
+\newcommand{\mayberesetallstyles}{
+    \mayberesetbarstyles
+    \mayberesetboxplotstyles
+    \mayberesetaxisstyle
+    \mayberesetnodestyle
+    \mayberesettickstyle
+}
+
+\mayberesetallstyles
+
+\newcommand{\maybesetbarstyle}[1]{\tikzset{maybe@barstyle/.style={#1}}}
+\newcommand{\maybesetbarknobstyle}[1]{\tikzset{maybe@barknobstyle/.style={#1}}}
 \newcommand{\maybesetaxisstyle}[1]{\tikzset{maybe@axisstyle/.style={#1}}}
 \newcommand{\maybesetnodestyle}[1]{\tikzset{maybe@nodestlye/.style={#1}}}
 \newcommand{\maybesettickstyle}[1]{\tikzset{maybe@tickstlye/.style={#1}}}
@@ -109,10 +121,10 @@
 
 
 % ~~ QoL ~~
-\newcommand{\maybe@xaxisextendfrom}{0.5em}
-\newcommand{\maybe@xaxisextendto}{1em}
-\newcommand{\maybe@yaxisextendfrom}{0.5ex}
-\newcommand{\maybe@yaxisextendto}{1ex}
+\newcommand{\maybe@xaxisextendfrom}{1.0em}
+\newcommand{\maybe@xaxisextendto}{2.0em}
+\newcommand{\maybe@yaxisextendfrom}{1.0ex}
+\newcommand{\maybe@yaxisextendto}{2.0ex}
 \newcommand{\maybe@axisnodeoffset}{2.0ex}
 \newcommand{\maybe@tickoffset}{0.5ex}
 \newcommand{\maybe@barknobradius}{0pt}
