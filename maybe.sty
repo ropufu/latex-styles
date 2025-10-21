@@ -71,12 +71,18 @@
     \tikzset{maybe@tickstlye/.style={}}
 }
 
+\newcommand{\mayberesetcurvestyles}{
+    \tikzset{maybe@curvestyle/.style={}}
+    \tikzset{maybe@fillcurvestyle/.style={}}
+}
+
 \newcommand{\mayberesetallstyles}{
     \mayberesetbarstyles
     \mayberesetboxplotstyles
     \mayberesetaxisstyle
     \mayberesetnodestyle
     \mayberesettickstyle
+    \mayberesetcurvestyles
 }
 
 \mayberesetallstyles
@@ -90,6 +96,8 @@
 \newcommand{\maybesetmedianstyle}[1]{\tikzset{maybe@medianstyle/.style={#1}}}
 \newcommand{\maybesetwhiskerstyle}[1]{\tikzset{maybe@whiskerstyle/.style={#1}}}
 \newcommand{\maybesetwhiskerlinestyle}[1]{\tikzset{maybe@whisklinestyle/.style={#1}}}
+\newcommand{\maybesetcurvestyle}[1]{\tikzset{maybe@curvestyle/.style={#1}}}
+\newcommand{\maybesetfillcurvestyle}[1]{\tikzset{maybe@fillcurvestyle/.style={#1}}}
 
 \newcommand{\maybebarstyle}{maybe@barstyle}
 \newcommand{\maybebarknobstyle}{maybe@barknobstyle}
@@ -561,3 +569,77 @@
     \draw[maybe@whiskerstyle] (\maybe@@whiskerfrom, \maybe@@a) -- (\maybe@@whiskerto, \maybe@@a);
     \draw[maybe@whiskerstyle] (\maybe@@whiskerfrom, \maybe@@e) -- (\maybe@@whiskerto, \maybe@@e);
 } % \maybeVBoxPlot
+
+
+
+% ~~ Densities ~~
+
+% Height of the Gaussian curve.
+% Arguments:
+% -- 1: mean.
+% -- 2: standard deviation.
+% -- 3: x-coordinate.
+\newcommand{\maybe@HGaussianCurve}[3]{exp(-((#3 - #1)^2)/(2 * (#2)^2)) / sqrt(2 * pi * (#2)^2)}
+
+% Height of the Cauchy curve.
+% Arguments:
+% -- 1: location.
+% -- 2: scale.
+% -- 3: x-coordinate.
+\newcommand{\maybe@HCauchyCurve}[3]{(#2 / ((#3 - #1)^2 + (#2)^2)) / pi}
+
+% Draw the Gaussian curve.
+% Arguments:
+% -- 1: mean.
+% -- 2: standard deviation.
+% -- 3: comma-separated list (xfrom, xto).
+% -- 4: y-coordinate.
+\newcommand{\maybeDrawHGaussian}[4]{
+    \pgfmathparse{{#3}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
+    \pgfmathparse{{#3}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
+    \draw[maybe@curvestyle] plot[domain = \maybe@@a : \maybe@@b]
+        (\maybe@xscale * \x, {\maybe@yscale * (#4) + \maybe@yscale * \maybe@HGaussianCurve{#1}{#2}{\x}});
+} % \maybeDrawHGaussian
+
+% Fill an area under the Gaussian curve.
+% Arguments:
+% -- 1: mean.
+% -- 2: standard deviation.
+% -- 3: comma-separated list (xfrom, xto).
+% -- 4: y-coordinate.
+\newcommand{\maybeFillHGaussian}[4]{
+    \pgfmathparse{{#3}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
+    \pgfmathparse{{#3}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
+    \fill[maybe@fillcurvestyle] plot[domain = \maybe@@a : \maybe@@b]
+        (\maybe@xscale * \x, {\maybe@yscale * (#4) + \maybe@yscale * \maybe@HGaussianCurve{#1}{#2}{\x}}) --
+        (\maybe@xscale * \maybe@@b, {\maybe@yscale * (#4)}) --
+        (\maybe@xscale * \maybe@@a, {\maybe@yscale * (#4)}) -- cycle;
+} % \maybeFillHGaussian
+
+% Draw the Cauchy curve.
+% Arguments:
+% -- 1: location.
+% -- 2: scale.
+% -- 3: comma-separated list (xfrom, xto).
+% -- 4: y-coordinate.
+\newcommand{\maybeDrawHCauchy}[4]{
+    \pgfmathparse{{#3}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
+    \pgfmathparse{{#3}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
+    \draw[maybe@curvestyle] plot[domain = \maybe@@a : \maybe@@b]
+        (\maybe@xscale * \x, {\maybe@yscale * (#4) + \maybe@yscale * \maybe@HCauchyCurve{#1}{#2}{\x}});
+} % \maybeDrawHCauchy
+
+% Fill an area under the Cauchy curve.
+% Arguments:
+% -- 1: location.
+% -- 2: scale.
+% -- 3: comma-separated list (xfrom, xto).
+% -- 4: y-coordinate.
+\newcommand{\maybeFillHCauchy}[4]{
+    \pgfmathparse{{#3}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
+    \pgfmathparse{{#3}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
+    \fill[maybe@fillcurvestyle] plot[domain = \maybe@@a : \maybe@@b]
+        (\maybe@xscale * \x, {\maybe@yscale * (#4) + \maybe@yscale * \maybe@HCauchyCurve{#1}{#2}{\x}}) --
+        (\maybe@xscale * \maybe@@b, {\maybe@yscale * (#4)}) --
+        (\maybe@xscale * \maybe@@a, {\maybe@yscale * (#4)}) -- cycle;
+} % \maybeFillHCauchy
