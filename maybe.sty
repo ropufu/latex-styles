@@ -579,14 +579,14 @@
 % -- 1: mean.
 % -- 2: standard deviation.
 % -- 3: x-coordinate.
-\newcommand{\maybe@HGaussianCurve}[3]{exp(-((#3 - #1)^2)/(2 * (#2)^2)) / sqrt(2 * pi * (#2)^2)}
+\newcommand{\maybeHGaussianCurve}[3]{exp(-((#3 - #1)^2)/(2 * (#2)^2)) / sqrt(2 * pi * (#2)^2)}
 
 % Height of the Cauchy curve.
 % Arguments:
 % -- 1: location.
 % -- 2: scale.
 % -- 3: x-coordinate.
-\newcommand{\maybe@HCauchyCurve}[3]{(#2 / ((#3 - #1)^2 + (#2)^2)) / pi}
+\newcommand{\maybeHCauchyCurve}[3]{(#2 / ((#3 - #1)^2 + (#2)^2)) / pi}
 
 % Draw the Gaussian curve.
 % Arguments:
@@ -598,7 +598,7 @@
     \pgfmathparse{{#3}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
     \pgfmathparse{{#3}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
     \draw[maybe@curvestyle] plot[domain = \maybe@@a : \maybe@@b]
-        (\maybe@xscale * \x, {\maybe@yscale * (#4) + \maybe@yscale * \maybe@HGaussianCurve{#1}{#2}{\x}});
+        (\maybe@xscale * \x, {\maybe@yscale * (#4) + \maybe@yscale * \maybeHGaussianCurve{#1}{#2}{\x}});
 } % \maybeDrawHGaussian
 
 % Fill an area under the Gaussian curve.
@@ -611,7 +611,7 @@
     \pgfmathparse{{#3}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
     \pgfmathparse{{#3}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
     \fill[maybe@fillcurvestyle] plot[domain = \maybe@@a : \maybe@@b]
-        (\maybe@xscale * \x, {\maybe@yscale * (#4) + \maybe@yscale * \maybe@HGaussianCurve{#1}{#2}{\x}}) --
+        (\maybe@xscale * \x, {\maybe@yscale * (#4) + \maybe@yscale * \maybeHGaussianCurve{#1}{#2}{\x}}) --
         (\maybe@xscale * \maybe@@b, {\maybe@yscale * (#4)}) --
         (\maybe@xscale * \maybe@@a, {\maybe@yscale * (#4)}) -- cycle;
 } % \maybeFillHGaussian
@@ -626,7 +626,7 @@
     \pgfmathparse{{#3}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
     \pgfmathparse{{#3}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
     \draw[maybe@curvestyle] plot[domain = \maybe@@a : \maybe@@b]
-        (\maybe@xscale * \x, {\maybe@yscale * (#4) + \maybe@yscale * \maybe@HCauchyCurve{#1}{#2}{\x}});
+        (\maybe@xscale * \x, {\maybe@yscale * (#4) + \maybe@yscale * \maybeHCauchyCurve{#1}{#2}{\x}});
 } % \maybeDrawHCauchy
 
 % Fill an area under the Cauchy curve.
@@ -639,7 +639,7 @@
     \pgfmathparse{{#3}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
     \pgfmathparse{{#3}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
     \fill[maybe@fillcurvestyle] plot[domain = \maybe@@a : \maybe@@b]
-        (\maybe@xscale * \x, {\maybe@yscale * (#4) + \maybe@yscale * \maybe@HCauchyCurve{#1}{#2}{\x}}) --
+        (\maybe@xscale * \x, {\maybe@yscale * (#4) + \maybe@yscale * \maybeHCauchyCurve{#1}{#2}{\x}}) --
         (\maybe@xscale * \maybe@@b, {\maybe@yscale * (#4)}) --
         (\maybe@xscale * \maybe@@a, {\maybe@yscale * (#4)}) -- cycle;
 } % \maybeFillHCauchy
