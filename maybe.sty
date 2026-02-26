@@ -171,6 +171,7 @@
 % ~~ Operators ~~
 \let\Pr\relax
 \DeclareMathOperator{\Prop}{\mathsf{Prop}}    % Proportion Pr.
+\DeclareMathOperator{\Mean}{\mathsf{Mean}}    % Mean.
 \DeclareMathOperator{\Pr}{\mathsf{P}}         % Probability P.
 \DeclareMathOperator{\dist}{\mathsf{dist}}    % Distance.
 \DeclareMathOperator{\EV}{\mathsf{E}}         % Expected value.
@@ -588,6 +589,26 @@
 % -- 3: x-coordinate.
 \newcommand{\maybeHCauchyCurve}[3]{(#2 / ((#3 - #1)^2 + (#2)^2)) / pi}
 
+% Height of the Student's t(2) curve.
+% Arguments:
+% -- 1: x-coordinate.
+\newcommand{\maybeHStudentTwoCurve}[1]{(1 / (1 + (#1)^2 / 2)^(1.5)) / (2 * sqrt(2))}
+
+% Height of the Student's t(3) curve.
+% Arguments:
+% -- 1: x-coordinate.
+\newcommand{\maybeHStudentThreeCurve}[1]{(2 / (1 + (#1)^2 / 3)^(2)) / (pi * sqrt(3))}
+
+% Height of the Student's t(4) curve.
+% Arguments:
+% -- 1: x-coordinate.
+\newcommand{\maybeHStudentFourCurve}[1]{(3 / (1 + (#1)^2 / 4)^(2.5)) / (8)}
+
+% Height of the Student's t(5) curve.
+% Arguments:
+% -- 1: x-coordinate.
+\newcommand{\maybeHStudentFiveCurve}[1]{(8 / (1 + (#1)^2 / 5)^(3)) / (3 * pi * sqrt(5))}
+
 % Draw the Gaussian curve.
 % Arguments:
 % -- 1: mean.
@@ -643,3 +664,99 @@
         (\maybe@xscale * \maybe@@b, {\maybe@yscale * (#4)}) --
         (\maybe@xscale * \maybe@@a, {\maybe@yscale * (#4)}) -- cycle;
 } % \maybeFillHCauchy
+
+% Draw the Student's t(2) curve.
+% Arguments:
+% -- 1: comma-separated list (xfrom, xto).
+% -- 2: y-coordinate.
+\newcommand{\maybeDrawHStudentTwo}[2]{
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
+    \draw[maybe@curvestyle] plot[domain = \maybe@@a : \maybe@@b]
+        (\maybe@xscale * \x, {\maybe@yscale * (#2) + \maybe@yscale * \maybeHStudentTwoCurve{\x}});
+} % \maybeDrawHStudentTwo
+
+% Fill an area under the Student's t(2) curve.
+% Arguments:
+% -- 1: comma-separated list (xfrom, xto).
+% -- 2: y-coordinate.
+\newcommand{\maybeFillHStudentTwo}[2]{
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
+    \fill[maybe@fillcurvestyle] plot[domain = \maybe@@a : \maybe@@b]
+        (\maybe@xscale * \x, {\maybe@yscale * (#2) + \maybe@yscale * \maybeHStudentTwoCurve{\x}}) --
+        (\maybe@xscale * \maybe@@b, {\maybe@yscale * (#2)}) --
+        (\maybe@xscale * \maybe@@a, {\maybe@yscale * (#2)}) -- cycle;
+} % \maybeFillHStudentTwo
+
+% Draw the Student's t(3) curve.
+% Arguments:
+% -- 1: comma-separated list (xfrom, xto).
+% -- 2: y-coordinate.
+\newcommand{\maybeDrawHStudentThree}[2]{
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
+    \draw[maybe@curvestyle] plot[domain = \maybe@@a : \maybe@@b]
+        (\maybe@xscale * \x, {\maybe@yscale * (#2) + \maybe@yscale * \maybeHStudentThreeCurve{\x}});
+} % \maybeDrawHStudentThree
+
+% Fill an area under the Student's t(3) curve.
+% Arguments:
+% -- 1: comma-separated list (xfrom, xto).
+% -- 2: y-coordinate.
+\newcommand{\maybeFillHStudentThree}[2]{
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
+    \fill[maybe@fillcurvestyle] plot[domain = \maybe@@a : \maybe@@b]
+        (\maybe@xscale * \x, {\maybe@yscale * (#2) + \maybe@yscale * \maybeHStudentThreeCurve{\x}}) --
+        (\maybe@xscale * \maybe@@b, {\maybe@yscale * (#2)}) --
+        (\maybe@xscale * \maybe@@a, {\maybe@yscale * (#2)}) -- cycle;
+} % \maybeFillHStudentThree
+
+% Draw the Student's t(4) curve.
+% Arguments:
+% -- 1: comma-separated list (xfrom, xto).
+% -- 2: y-coordinate.
+\newcommand{\maybeDrawHStudentFour}[2]{
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
+    \draw[maybe@curvestyle] plot[domain = \maybe@@a : \maybe@@b]
+        (\maybe@xscale * \x, {\maybe@yscale * (#2) + \maybe@yscale * \maybeHStudentFourCurve{\x}});
+} % \maybeDrawHStudentFour
+
+% Fill an area under the Student's t(4) curve.
+% Arguments:
+% -- 1: comma-separated list (xfrom, xto).
+% -- 2: y-coordinate.
+\newcommand{\maybeFillHStudentFour}[2]{
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
+    \fill[maybe@fillcurvestyle] plot[domain = \maybe@@a : \maybe@@b]
+        (\maybe@xscale * \x, {\maybe@yscale * (#2) + \maybe@yscale * \maybeHStudentFourCurve{\x}}) --
+        (\maybe@xscale * \maybe@@b, {\maybe@yscale * (#2)}) --
+        (\maybe@xscale * \maybe@@a, {\maybe@yscale * (#2)}) -- cycle;
+} % \maybeFillHStudentFour
+
+% Draw the Student's t(5) curve.
+% Arguments:
+% -- 1: comma-separated list (xfrom, xto).
+% -- 2: y-coordinate.
+\newcommand{\maybeDrawHStudentFive}[2]{
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
+    \draw[maybe@curvestyle] plot[domain = \maybe@@a : \maybe@@b]
+        (\maybe@xscale * \x, {\maybe@yscale * (#2) + \maybe@yscale * \maybeHStudentFiveCurve{\x}});
+} % \maybeDrawHStudentFour
+
+% Fill an area under the Student's t(5) curve.
+% Arguments:
+% -- 1: comma-separated list (xfrom, xto).
+% -- 2: y-coordinate.
+\newcommand{\maybeFillHStudentFive}[2]{
+    \pgfmathparse{{#1}[0]}; \pgfmathsetmacro{\maybe@@a}{\pgfmathresult};
+    \pgfmathparse{{#1}[1]}; \pgfmathsetmacro{\maybe@@b}{\pgfmathresult};
+    \fill[maybe@fillcurvestyle] plot[domain = \maybe@@a : \maybe@@b]
+        (\maybe@xscale * \x, {\maybe@yscale * (#2) + \maybe@yscale * \maybeHStudentFiveCurve{\x}}) --
+        (\maybe@xscale * \maybe@@b, {\maybe@yscale * (#2)}) --
+        (\maybe@xscale * \maybe@@a, {\maybe@yscale * (#2)}) -- cycle;
+} % \maybeFillHStudentFour
